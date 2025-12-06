@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Event Photos</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #000;
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    #btn {
+      margin-top: 40px;
+      background: #0f0;
+      color: black;
+      font-size: 22px;
+      padding: 15px 25px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<h1 id="eventName">Loading...</h1>
+<p id="eventMessage"></p>
+
+<button id="btn">📸 Take Photo / 🎥 Record Video</button>
+<p id="status"></p>
+
+<script>
+// Read ?eventId=xxxx from URL
+const params = new URLSearchParams(location.search);
+const eventId = params.get("eventId");
+
+if (!eventId) {
+  document.getElementById("eventName").innerText = "Invalid event link";
+} else {
+  document.getElementById("eventName").innerText = "Upload to event: " + eventId;
+  document.getElementById("eventMessage").innerText = "Take a photo or record a short video.";
+}
+
+async function uploadFile(file) {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("eventId", eventId);
+
+  const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev", {
+    method: "POST",
+    body: form
+  });
+
+  document.getElementById("status").innerText =
+    res.ok ? "Upload complete ✔️" : "Upload failed ❌";
+}
+
+document.getElementById("btn").onclick = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*,video/*";
+  input.capture = "environment";
+  input.onchange = () => uploadFile(input.files[0]);
+  input.click();
+};
+</script>
+
+</body>
+</html>
