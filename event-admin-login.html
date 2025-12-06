@@ -60,12 +60,14 @@
   </div>
 
 <script>
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+
 async function login() {
   const eventId = document.getElementById("eventId").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-
   const status = document.getElementById("status");
+
   status.textContent = "";
 
   if (!eventId || !email || !password) {
@@ -73,21 +75,22 @@ async function login() {
     return;
   }
 
-  // Try login by calling list-files
-  const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/list-files", {
+  status.textContent = "Checking credentials...";
+
+  const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({ eventId, email, password })
   });
 
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    status.textContent = data.error || "Invalid login";
+    status.textContent = data.error || "Invalid login.";
     return;
   }
 
-  // Save session
+  // Save in session
   sessionStorage.setItem("eventId", eventId);
   sessionStorage.setItem("email", email);
   sessionStorage.setItem("password", password);
