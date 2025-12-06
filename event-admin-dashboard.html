@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" class="dark:bg-black dark:text-white">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Event Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .glass {
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .dark .glass {
+      background: rgba(20, 20, 20, 0.4);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen p-6">
+
+  <h1 class="text-3xl font-bold mb-6 text-center">📁 Event Admin Dashboard</h1>
+
+  <div class="max-w-4xl mx-auto glass p-6 rounded-2xl shadow-xl border border-white/20">
+
+    <h2 id="eventLabel" class="text-xl font-bold mb-4"></h2>
+
+    <p class="text-gray-500 dark:text-gray-300 mb-6">
+      You can view uploaded media and download them.
+    </p>
+
+    <button onclick="downloadAll()"
+      class="mb-6 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-xl shadow">
+      ⬇️ Download All Files (ZIP Coming Soon)
+    </button>
+
+    <!-- Gallery -->
+    <h3 class="text-lg font-semibold mb-2">Gallery Preview</h3>
+
+    <div id="gallery" class="grid grid-cols-3 gap-2 mb-8"></div>
+
+    <!-- File List -->
+    <h3 class="text-lg font-semibold mb-2">Files</h3>
+
+    <div id="fileList" class="space-y-2"></div>
+
+    <p id="status" class="text-center text-red-500 mt-4"></p>
+
+  </div>
+
+<script>
+const eventId = sessionStorage.getItem("eventId");
+const email = sessionStorage.getItem("email");
+const password = sessionStorage.getItem("password");
+
+if (!eventId || !email || !password) {
+  window.location.href = "event-admin-login.html";
+}
+
+document.getElementById("eventLabel").textContent = "Event: " + eventId;
+
+async function loadFiles() {
+  const res = await fetch(
+    "https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/list-files",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, email, password })
+    }
+  );
+
+  const data = await res.json();
+  const gallery = document.getElementById("gallery");
+  const list = document.getElementById("fileList");
+  gallery.innerHTML = "";
+  list.innerHTML = "";
+
+  if (!res.ok) {
+    document.getElementById("status").textContent = data.error;
+    return;
+  }
+
+  data.files.forEach(file => {
+    const thumbUrl =
+      `https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/get-file?thumb=1&eventId=${eventId}&file=${encodeURIComponent(file.name)}`;
+
+    const div = document.createElement("div");
+    div.className = "w-full h-24 overflow-hidden rounded-lg bg-black/20";
+
+    if (file.name.endsWith(".mp4")) {
+      div.innerHTML = `<video src="/api/event-admin/get-file?eventId=${eventId}&file=${encodeURIComponent(file.name)}"
+                      class="w-full h-full object-cover" muted></video>`;
+    } else {
+      div.innerHTML = `<img src="https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/get-file?eventId=${eventId}&file=${encodeURIComponent(file.name)}"
+                      class="w-full h-full object-cover">`;
+    }
+
+    gallery.appendChild(div);
+
+    // File list
+    const row = document.createElement("div");
+    row.className = "flex justify-between items-center bg-white/10 dark:bg-black/20 p-3 rounded-lg";
+
+    row.innerHTML = `
+      <span>${file.name}</span>
+      <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+        onclick="downloadFile('${file.name}')">
+        Download
+      </button>
+    `;
+
+    list.appendChild(row);
+  });
+}
+
+async function downloadFile(fileName) {
+  const res = await fetch(
+    "https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/get-file",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, email, password, fileName })
+    }
+  );
+
+  if (!res.ok) {
+    alert("Download failed.");
+    return;
+  }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// Placeholder until ZIP logic is implemented
+function downloadAll() {
+  alert("ZIP download not implemented yet — but everything is ready to add it!");
+}
+
+loadFiles();
+</script>
+
+</body>
+</html>
