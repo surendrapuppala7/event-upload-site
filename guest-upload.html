@@ -1,61 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark:bg-black dark:text-white">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Upload Your Photos</title>
+  <title>Upload Event Media</title>
+
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #000; color: white; }
+    }
+  </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+<body class="min-h-screen flex flex-col items-center p-6">
 
-  <header class="w-full bg-white shadow py-4 mb-6">
-    <h1 class="text-2xl font-bold text-center">📸 Upload to Event</h1>
-  </header>
+  <!-- Header -->
+  <h1 id="eventName" class="text-2xl font-bold mt-6 text-center"></h1>
+  <p id="eventMessage" class="text-gray-600 dark:text-gray-300 mt-2 text-center"></p>
 
-  <main class="w-full max-w-md p-6 bg-white rounded-2xl shadow-lg text-center">
+  <!-- Upload Button -->
+  <button id="btn"
+    class="mt-10 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white text-xl rounded-2xl shadow-lg transition active:scale-95">
+    📸 Take Photo / 🎥 Record Video
+  </button>
 
-    <p id="eventInfo" class="text-gray-600 mb-4"></p>
+  <!-- Status Message -->
+  <p id="status" class="mt-6 text-lg font-medium text-center"></p>
 
-    <input 
-      id="fileInput" 
-      type="file" 
-      accept="image/*,video/*"
-      class="mb-4 block w-full text-sm text-gray-700
-             file:mr-4 file:py-2 file:px-4
-             file:rounded-xl file:border-0
-             file:text-sm file:font-semibold
-             file:bg-indigo-600 file:text-white
-             hover:file:bg-indigo-700"
-    />
-
-    <button 
-      onclick="uploadFile()"
-      class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">
-      Upload
-    </button>
-
-    <p id="status" class="mt-4 text-gray-700"></p>
-  </main>
-
+  <!-- Loading Spinner -->
+  <div id="spinner" class="mt-4 hidden">
+    <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
+    <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">Uploading...</p>
+  </div>
 
 <script>
+// Read eventId from URL
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
 
-// Show event ID for guest info
-document.getElementById("eventInfo").textContent =
-  eventId ? `Event ID: ${eventId}` : "Invalid event link";
+if (!eventId) {
+  document.getElementById("eventName").innerText = "Invalid event link";
+} else {
+  document.getElementById("eventName").innerText = "Upload to Event: " + eventId;
+  document.getElementById("eventMessage").innerText =
+    "Take a photo or record a video to upload.";
+}
 
-async function uploadFile() {
-  const file = document.getElementById("fileInput").files[0];
+// Upload Function
+async function uploadFile(file) {
   const status = document.getElementById("status");
+  const spinner = document.getElementById("spinner");
 
-  if (!file) {
-    status.textContent = "⚠️ Please select a photo or video.";
-    return;
-  }
-
-  status.textContent = "⏳ Uploading...";
+  spinner.classList.remove("hidden");
+  status.textContent = "";
 
   const form = new FormData();
   form.append("file", file);
@@ -66,13 +65,26 @@ async function uploadFile() {
     body: form
   });
 
-  if (!res.ok) {
-    status.textContent = "❌ Upload failed.";
-    return;
-  }
+  spinner.classList.add("hidden");
 
-  status.textContent = "✅ Upload successful! Thank you!";
+  if (res.ok) {
+    status.textContent = "✅ Uploaded successfully! Thank you!";
+    status.className = "mt-6 text-lg font-semibold text-green-500 text-center";
+  } else {
+    status.textContent = "❌ Upload failed. Please try again.";
+    status.className = "mt-6 text-lg font-semibold text-red-500 text-center";
+  }
 }
+
+// Trigger Camera Input
+document.getElementById("btn").onclick = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*,video/*";
+  input.capture = "environment"; // mobile back camera
+  input.onchange = () => uploadFile(input.files[0]);
+  input.click();
+};
 </script>
 
 </body>
