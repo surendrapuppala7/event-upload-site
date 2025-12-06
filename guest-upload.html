@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Upload Your Photos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
+
+  <header class="w-full bg-white shadow py-4 mb-6">
+    <h1 class="text-2xl font-bold text-center">📸 Upload to Event</h1>
+  </header>
+
+  <main class="w-full max-w-md p-6 bg-white rounded-2xl shadow-lg text-center">
+
+    <p id="eventInfo" class="text-gray-600 mb-4"></p>
+
+    <input 
+      id="fileInput" 
+      type="file" 
+      accept="image/*,video/*"
+      class="mb-4 block w-full text-sm text-gray-700
+             file:mr-4 file:py-2 file:px-4
+             file:rounded-xl file:border-0
+             file:text-sm file:font-semibold
+             file:bg-indigo-600 file:text-white
+             hover:file:bg-indigo-700"
+    />
+
+    <button 
+      onclick="uploadFile()"
+      class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">
+      Upload
+    </button>
+
+    <p id="status" class="mt-4 text-gray-700"></p>
+  </main>
+
+
+<script>
+const params = new URLSearchParams(location.search);
+const eventId = params.get("eventId");
+
+// Show event ID for guest info
+document.getElementById("eventInfo").textContent =
+  eventId ? `Event ID: ${eventId}` : "Invalid event link";
+
+async function uploadFile() {
+  const file = document.getElementById("fileInput").files[0];
+  const status = document.getElementById("status");
+
+  if (!file) {
+    status.textContent = "⚠️ Please select a photo or video.";
+    return;
+  }
+
+  status.textContent = "⏳ Uploading...";
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("eventId", eventId);
+
+  const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/", {
+    method: "POST",
+    body: form
+  });
+
+  if (!res.ok) {
+    status.textContent = "❌ Upload failed.";
+    return;
+  }
+
+  status.textContent = "✅ Upload successful! Thank you!";
+}
+</script>
+
+</body>
+</html>
