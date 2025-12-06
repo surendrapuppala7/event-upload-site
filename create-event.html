@@ -1,79 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Create Event</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      text-align: center;
-      background: #f4f4f4;
-    }
-    input {
-      padding: 10px;
-      font-size: 16px;
-      margin: 5px 0;
-      width: 90%;
-      max-width: 320px;
-    }
-    button {
-      margin-top: 15px;
-      padding: 12px 20px;
-      font-size: 18px;
-      border-radius: 10px;
-      border: none;
-      background: #4f46e5;
-      color: white;
-      cursor: pointer;
-    }
-    #qr {
-      margin-top: 20px;
-      background: white;
-      padding: 10px;
-    }
-    #event-info {
-      margin-top: 15px;
-      font-size: 16px;
-    }
-    #status {
-      margin-top: 10px;
-      color: #444;
-    }
-  </style>
 </head>
 
-<body>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center">
 
-<h1>Create New Event</h1>
-<p>Enter details and generate a QR code.</p>
+  <header class="w-full bg-white shadow py-4 mb-8">
+    <h1 class="text-2xl font-bold text-center">🎉 Create New Event</h1>
+  </header>
 
-<input id="eventName" placeholder="Event name (e.g. Sarah & John's Wedding)">
-<br>
-<input id="ownerEmail" placeholder="Owner email (for admin view)">
-<br>
-<button onclick="generate()">Create Event</button>
+  <main class="w-full max-w-lg bg-white rounded-2xl shadow-lg p-6">
 
-<p id="status"></p>
+    <p class="text-gray-600 mb-6 text-center">
+      Enter your event details to generate a QR code for guests.
+    </p>
 
-<div id="event-info"></div>
-<canvas id="qr"></canvas>
+    <!-- Form -->
+    <div class="space-y-4">
+
+      <div>
+        <label class="font-semibold text-gray-700">Event Name</label>
+        <input id="eventName"
+          class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring focus:ring-indigo-300"
+          placeholder="e.g. John's Birthday Party">
+      </div>
+
+      <div>
+        <label class="font-semibold text-gray-700">Owner Email</label>
+        <input id="ownerEmail"
+          class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring focus:ring-indigo-300"
+          placeholder="your@email.com">
+      </div>
+
+      <button onclick="generate()"
+        class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-indigo-700 transition">
+        ➕ Create Event
+      </button>
+
+    </div>
+
+    <p id="status" class="mt-4 text-center text-gray-700"></p>
+
+    <!-- QR Section -->
+    <div id="qrSection" class="hidden mt-8 p-6 border rounded-2xl bg-gray-50 text-center">
+
+      <h3 class="text-xl font-semibold mb-2" id="eventTitle"></h3>
+
+      <p class="text-sm text-gray-500">Event Link</p>
+      <p id="eventLink" class="break-words text-indigo-600 font-medium mb-4"></p>
+
+      <canvas id="qrCanvas" class="mx-auto"></canvas>
+    </div>
+
+  </main>
 
 <script>
 async function generate() {
   const name = document.getElementById("eventName").value.trim();
   const owner = document.getElementById("ownerEmail").value.trim();
   const status = document.getElementById("status");
-  const info = document.getElementById("event-info");
-  const qrCanvas = document.getElementById("qr");
+  const qrSection = document.getElementById("qrSection");
 
   if (!name || !owner) {
-    status.textContent = "Please enter event name and owner email.";
+    status.textContent = "⚠️ Please enter both event name and owner email.";
     return;
   }
 
-  status.textContent = "Creating event...";
+  status.textContent = "⏳ Creating event...";
 
   const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/api/create-event", {
     method: "POST",
@@ -82,24 +79,24 @@ async function generate() {
   });
 
   if (!res.ok) {
-    status.textContent = "Error creating event.";
+    status.textContent = "❌ Error creating event.";
     return;
   }
 
   const data = await res.json();
   const eventId = data.eventId;
-  status.textContent = "Event created!";
+
+  status.textContent = "✅ Event created!";
+  qrSection.classList.remove("hidden");
 
   const eventUrl = location.origin + "/event.html?eventId=" + eventId;
 
-  info.innerHTML = `
-    <h3>${name}</h3>
-    <p><strong>Event ID:</strong> ${eventId}</p>
-    <p><a href="${eventUrl}" target="_blank">${eventUrl}</a></p>
-  `;
+  document.getElementById("eventTitle").textContent = name;
+  document.getElementById("eventLink").textContent = eventUrl;
 
-  QRCode.toCanvas(qrCanvas, eventUrl, function (error) {
-    if (error) console.error(error);
+  // Generate QR code
+  QRCode.toCanvas(document.getElementById("qrCanvas"), eventUrl, (err) => {
+    if (err) console.error(err);
   });
 }
 </script>
