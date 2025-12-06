@@ -5,15 +5,21 @@
   <title>Create Event</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
-    body { 
-      font-family: sans-serif; 
-      padding: 20px; 
+    body {
+      font-family: sans-serif;
+      padding: 20px;
       text-align: center;
       background: #f4f4f4;
     }
-    h1 { margin-bottom: 10px; }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      margin: 5px 0;
+      width: 90%;
+      max-width: 320px;
+    }
     button {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 12px 20px;
       font-size: 18px;
       border-radius: 10px;
@@ -31,38 +37,70 @@
       margin-top: 15px;
       font-size: 16px;
     }
+    #status {
+      margin-top: 10px;
+      color: #444;
+    }
   </style>
 </head>
 
 <body>
 
 <h1>Create New Event</h1>
-<p>Generate a QR code and upload link for guests.</p>
+<p>Enter details and generate a QR code.</p>
 
-<button onclick="generate()">Generate Event</button>
+<input id="eventName" placeholder="Event name (e.g. Sarah & John's Wedding)">
+<br>
+<input id="ownerEmail" placeholder="Owner email (for admin view)">
+<br>
+<button onclick="generate()">Create Event</button>
+
+<p id="status"></p>
 
 <div id="event-info"></div>
 <canvas id="qr"></canvas>
 
 <script>
-function generate() {
-    const eventId = "EVT" + Math.floor(Math.random()*90000 + 10000);
+async function generate() {
+  const name = document.getElementById("eventName").value.trim();
+  const owner = document.getElementById("ownerEmail").value.trim();
+  const status = document.getElementById("status");
+  const info = document.getElementById("event-info");
+  const qrCanvas = document.getElementById("qr");
 
-    const pageBase = location.origin + "/event.html?eventId=";
-    const eventUrl = pageBase + eventId;
+  if (!name || !owner) {
+    status.textContent = "Please enter event name and owner email.";
+    return;
+  }
 
-    document.getElementById("event-info").innerHTML = `
-        <h3>Event ID: ${eventId}</h3>
-        <p><a href="${eventUrl}" target="_blank">${eventUrl}</a></p>
-    `;
+  status.textContent = "Creating event...";
 
-    QRCode.toCanvas(
-      document.getElementById("qr"), 
-      eventUrl,
-      function (error) {
-        if (error) console.error(error);
-      }
-    );
+  const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/api/create-event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, owner })
+  });
+
+  if (!res.ok) {
+    status.textContent = "Error creating event.";
+    return;
+  }
+
+  const data = await res.json();
+  const eventId = data.eventId;
+  status.textContent = "Event created!";
+
+  const eventUrl = location.origin + "/event.html?eventId=" + eventId;
+
+  info.innerHTML = `
+    <h3>${name}</h3>
+    <p><strong>Event ID:</strong> ${eventId}</p>
+    <p><a href="${eventUrl}" target="_blank">${eventUrl}</a></p>
+  `;
+
+  QRCode.toCanvas(qrCanvas, eventUrl, function (error) {
+    if (error) console.error(error);
+  });
 }
 </script>
 
