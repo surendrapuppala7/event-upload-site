@@ -1,7 +1,70 @@
 <!DOCTYPE html>
 <html>
-<head><title>Create Event</title></head>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Create Event</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { 
+      font-family: sans-serif; 
+      padding: 20px; 
+      text-align: center;
+      background: #f4f4f4;
+    }
+    h1 { margin-bottom: 10px; }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 10px;
+      border: none;
+      background: #4f46e5;
+      color: white;
+      cursor: pointer;
+    }
+    #qr {
+      margin-top: 20px;
+      background: white;
+      padding: 10px;
+    }
+    #event-info {
+      margin-top: 15px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
 <body>
-Loading event creator...
+
+<h1>Create New Event</h1>
+<p>Generate a QR code and upload link for guests.</p>
+
+<button onclick="generate()">Generate Event</button>
+
+<div id="event-info"></div>
+<canvas id="qr"></canvas>
+
+<script>
+function generate() {
+    const eventId = "EVT" + Math.floor(Math.random()*90000 + 10000);
+
+    const pageBase = location.origin + "/event.html?eventId=";
+    const eventUrl = pageBase + eventId;
+
+    document.getElementById("event-info").innerHTML = `
+        <h3>Event ID: ${eventId}</h3>
+        <p><a href="${eventUrl}" target="_blank">${eventUrl}</a></p>
+    `;
+
+    QRCode.toCanvas(
+      document.getElementById("qr"), 
+      eventUrl,
+      function (error) {
+        if (error) console.error(error);
+      }
+    );
+}
+</script>
+
 </body>
 </html>
