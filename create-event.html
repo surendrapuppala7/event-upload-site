@@ -9,19 +9,22 @@
 
 <body class="bg-gray-100 min-h-screen flex flex-col items-center">
 
+  <!-- HEADER -->
   <header class="w-full bg-white shadow py-4 mb-8">
     <h1 class="text-2xl font-bold text-center">🎉 Create New Event</h1>
   </header>
 
+  <!-- MAIN CARD -->
   <main class="w-full max-w-lg bg-white rounded-2xl shadow-lg p-6">
 
     <p class="text-gray-600 mb-6 text-center">
       Enter your event details to generate a QR code for guests.
     </p>
 
-    <!-- Form -->
+    <!-- FORM -->
     <div class="space-y-4">
 
+      <!-- EVENT NAME -->
       <div>
         <label class="font-semibold text-gray-700">Event Name</label>
         <input id="eventName"
@@ -29,6 +32,7 @@
           placeholder="e.g. John's Birthday Party">
       </div>
 
+      <!-- OWNER EMAIL -->
       <div>
         <label class="font-semibold text-gray-700">Owner Email</label>
         <input id="ownerEmail"
@@ -36,6 +40,7 @@
           placeholder="your@email.com">
       </div>
 
+      <!-- BUTTON -->
       <button onclick="generate()"
         class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-indigo-700 transition">
         ➕ Create Event
@@ -45,7 +50,7 @@
 
     <p id="status" class="mt-4 text-center text-gray-700"></p>
 
-    <!-- QR Section -->
+    <!-- QR OUTPUT -->
     <div id="qrSection" class="hidden mt-8 p-6 border rounded-2xl bg-gray-50 text-center">
 
       <h3 class="text-xl font-semibold mb-2" id="eventTitle"></h3>
@@ -72,6 +77,7 @@ async function generate() {
 
   status.textContent = "⏳ Creating event...";
 
+  // Call Worker API
   const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/api/create-event", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -89,12 +95,13 @@ async function generate() {
   status.textContent = "✅ Event created!";
   qrSection.classList.remove("hidden");
 
-  const eventUrl = location.origin + "/event.html?eventId=" + eventId;
+  // Final guest upload page
+  const eventUrl = location.origin + "/guest-upload.html?eventId=" + eventId;
 
   document.getElementById("eventTitle").textContent = name;
   document.getElementById("eventLink").textContent = eventUrl;
 
-  // Generate QR code
+  // Generate QR Code
   QRCode.toCanvas(document.getElementById("qrCanvas"), eventUrl, (err) => {
     if (err) console.error(err);
   });
