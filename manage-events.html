@@ -6,7 +6,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    /* Glass effect */
     .glass {
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -27,7 +26,6 @@
     </p>
   </header>
 
-  <!-- Search Box -->
   <div class="max-w-lg mx-auto mb-8">
     <input id="ownerEmail" type="email"
       class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700
@@ -42,7 +40,6 @@
 
   <p id="status" class="text-center text-gray-600 dark:text-gray-400 mb-6"></p>
 
-  <!-- Events Grid -->
   <div id="eventsGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
 
 <script>
@@ -78,19 +75,20 @@ async function loadEvents() {
   }
 
   status.textContent = "";
+  grid.innerHTML = "";
+
+  const gradients = [
+    "from-indigo-500/20 to-purple-500/20",
+    "from-rose-400/20 to-pink-500/20",
+    "from-blue-400/20 to-cyan-500/20",
+    "from-emerald-400/20 to-green-500/20",
+    "from-orange-400/20 to-amber-500/20"
+  ];
 
   events.forEach(ev => {
-    const eventUrl = "/event.html?eventId=" + ev.id;
-    const galleryUrl = "/gallery.html?eventId=" + ev.id;
+    const uploadUrl = location.origin + "/event.html?eventId=" + ev.id;
+    const adminLoginUrl = location.origin + "/event-admin-login.html?eventId=" + ev.id;
 
-    // soft modern gradients
-    const gradients = [
-      "from-indigo-500/20 to-purple-500/20",
-      "from-rose-400/20 to-pink-500/20",
-      "from-blue-400/20 to-cyan-500/20",
-      "from-emerald-400/20 to-green-500/20",
-      "from-orange-400/20 to-amber-500/20"
-    ];
     const accent = gradients[Math.floor(Math.random() * gradients.length)];
 
     const card = document.createElement("div");
@@ -105,14 +103,14 @@ async function loadEvents() {
       <p class="text-xs text-gray-500 dark:text-gray-500 mb-4">Created: ${ev.created_at}</p>
 
       <div class="flex flex-col gap-3 mt-4">
-        <a href="${eventUrl}"
+        <a href="${uploadUrl}"
           class="text-center bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow transition">
-          📸 Open Upload Page
+          📸 Open Guest Upload Page
         </a>
 
-        <a href="${galleryUrl}"
+        <a href="${adminLoginUrl}"
           class="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg shadow transition">
-          🖼 View Gallery
+          🛠 Event Admin Login
         </a>
       </div>
     `;
