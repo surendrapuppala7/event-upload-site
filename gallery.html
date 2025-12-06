@@ -2,7 +2,7 @@
 <html lang="en" class="dark:bg-black dark:text-white">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Event Gallery</title>
+  <title>Event Gallery (Admin)</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -19,8 +19,20 @@
 
 <body class="min-h-screen p-6">
 
-<h1 class="text-3xl font-bold mb-4">🖼 Event Gallery</h1>
+<h1 class="text-3xl font-bold mb-2">🖼 Event Gallery (Admin)</h1>
 <p id="info" class="text-gray-600 dark:text-gray-400 mb-4"></p>
+
+<div class="flex gap-4 mb-4">
+  <button onclick="loadFiles()"
+    class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow">
+    🔄 Refresh
+  </button>
+
+  <button onclick="logout()"
+    class="px-4 py-2 bg-red-600 text-white rounded-lg shadow">
+    🚪 Logout
+  </button>
+</div>
 
 <div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
 
@@ -33,43 +45,76 @@
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
 
+const storedEventId = localStorage.getItem("adminEventId");
+const email = localStorage.getItem("adminEmail");
+const password = localStorage.getItem("adminPassword");
+
+if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
+  // force login
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
+}
+
 document.getElementById("info").textContent =
   "Loading gallery for event ID: " + eventId + "...";
 
-// Load file list
 async function loadFiles() {
+  const grid = document.getElementById("grid");
+  const info = document.getElementById("info");
+
+  grid.innerHTML = "Loading...";
+
   const res = await fetch(
-    "https://event-upload-api.surendra-david-puppala.workers.dev/list?eventId=" +
-      encodeURIComponent(eventId)
+    "https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/list-files",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, email, password })
+    }
   );
 
-  if (!res.ok) {
-    document.getElementById("info").textContent = "❌ Failed to load gallery.";
-    return;
-  }
-
   const data = await res.json();
-  const files = data.files || [];
 
-  if (files.length === 0) {
-    document.getElementById("info").textContent = "No uploads yet.";
+  if (!res.ok) {
+    grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
     return;
   }
 
-  document.getElementById("info").textContent = "";
+  const files = data.files || [];
+  if (files.length === 0) {
+    info.textContent = "No uploads yet for this event.";
+    grid.innerHTML = "";
+    return;
+  }
 
-  const grid = document.getElementById("grid");
+  info.textContent = `Showing ${files.length} file(s) for event ${eventId}.`;
+  grid.innerHTML = "";
 
   files.forEach(file => {
     const url =
       "https://event-upload-api.surendra-david-puppala.workers.dev/media?eventId=" +
-      eventId + "&file=" + encodeURIComponent(file.name);
+      encodeURIComponent(eventId) +
+      "&file=" +
+      encodeURIComponent(file.name);
 
-    const card = document.createElement("img");
-    card.src = url;
-    card.className = "rounded-lg img-card";
+    const card = document.createElement("div");
+    card.className = "rounded-lg overflow-hidden bg-gray-900 img-card";
+
+    let inner;
+    if (file.name.toLowerCase().endsWith(".mp4")) {
+      inner = `
+        <video controls class="w-full h-40 object-cover bg-black">
+          <source src="${url}" type="video/mp4">
+        </video>
+      `;
+    } else {
+      inner = `<img src="${url}" class="w-full h-40 object-cover">`;
+    }
+
+    card.innerHTML = inner + `
+      <div class="p-2 text-xs text-gray-300 truncate">${file.name}</div>
+    `;
+
     card.onclick = () => openModal(url);
-
     grid.appendChild(card);
   });
 }
@@ -80,8 +125,16 @@ function openModal(src) {
 
   modalImg.src = src;
   modal.classList.remove("hidden");
+  modal.classList.add("flex");
 
   modal.onclick = () => modal.classList.add("hidden");
+}
+
+function logout() {
+  localStorage.removeItem("adminEventId");
+  localStorage.removeItem("adminEmail");
+  localStorage.removeItem("adminPassword");
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
 }
 
 loadFiles();
