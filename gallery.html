@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gallery</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <h1 class="text-3xl font-bold">Event Gallery</h1>
+  <p class="text-gray-600 mt-2">Gallery for event will load here.</p>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const eventId = params.get("eventId");
+    console.log("Gallery opened for event:", eventId);
+  </script>
+</body>
+</html>
