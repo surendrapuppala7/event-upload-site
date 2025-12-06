@@ -1,71 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark:bg-black dark:text-white">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Manage My Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage Events</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input { padding: 10px; font-size: 16px; width: 80%; max-width: 320px; }
-    button {
-      padding: 10px 16px;
-      font-size: 16px;
-      margin-left: 8px;
-      background: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 6px;
+    /* Glass effect */
+    .glass {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.6);
     }
-    table {
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
+    .dark .glass {
+      background: rgba(30,30,30,0.5);
     }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-      font-size: 14px;
-    }
-    a { color: #4f46e5; }
   </style>
 </head>
 
-<body>
+<body class="min-h-screen p-6">
 
-<h1>My Events</h1>
-<p>Enter the owner email you used when creating events.</p>
+  <header class="w-full mb-8 text-center">
+    <h1 class="text-3xl font-bold">📋 Manage My Events</h1>
+    <p class="text-gray-600 dark:text-gray-300 mt-2">
+      Enter your email to view events you've created.
+    </p>
+  </header>
 
-<input id="ownerEmail" placeholder="owner@example.com">
-<button onclick="loadEvents()">Load</button>
+  <!-- Search Box -->
+  <div class="max-w-lg mx-auto mb-8">
+    <input id="ownerEmail" type="email"
+      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700
+             bg-white dark:bg-gray-900 focus:ring focus:ring-indigo-300 dark:focus:ring-indigo-800"
+      placeholder="Enter your email (same as event creation)">
+    
+    <button onclick="loadEvents()"
+      class="mt-4 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow transition">
+      🔍 Load Events
+    </button>
+  </div>
 
-<div id="status"></div>
-<table id="eventsTable" style="display:none;">
-  <thead>
-    <tr>
-      <th>Event ID</th>
-      <th>Name</th>
-      <th>Created</th>
-      <th>Upload Link</th>
-    </tr>
-  </thead>
-  <tbody id="eventsBody"></tbody>
-</table>
+  <p id="status" class="text-center text-gray-600 dark:text-gray-400 mb-6"></p>
+
+  <!-- Events Grid -->
+  <div id="eventsGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
 
 <script>
 async function loadEvents() {
   const email = document.getElementById("ownerEmail").value.trim();
   const status = document.getElementById("status");
-  const table = document.getElementById("eventsTable");
-  const body = document.getElementById("eventsBody");
+  const grid = document.getElementById("eventsGrid");
 
   if (!email) {
-    status.textContent = "Please enter an email.";
+    status.textContent = "⚠️ Please enter your email.";
     return;
   }
 
-  status.textContent = "Loading events...";
-  table.style.display = "none";
-  body.innerHTML = "";
+  status.textContent = "⏳ Loading events...";
+  grid.innerHTML = "";
 
   const res = await fetch(
     "https://event-upload-api.surendra-david-puppala.workers.dev/api/list-events?owner=" +
@@ -73,7 +65,7 @@ async function loadEvents() {
   );
 
   if (!res.ok) {
-    status.textContent = "Error loading events.";
+    status.textContent = "❌ Error loading events.";
     return;
   }
 
@@ -86,20 +78,46 @@ async function loadEvents() {
   }
 
   status.textContent = "";
-  table.style.display = "table";
 
-  events.forEach((ev) => {
-    const tr = document.createElement("tr");
+  events.forEach(ev => {
     const eventUrl = location.origin + "/event.html?eventId=" + ev.id;
+    const galleryUrl = location.origin + "/gallery.html?eventId=" + ev.id;
 
-    tr.innerHTML = `
-      <td>${ev.id}</td>
-      <td>${ev.name}</td>
-      <td>${ev.created_at}</td>
-      <td><a href="${eventUrl}" target="_blank">Open</a></td>
+    // Subtle gradient accent - dynamically assigned but soft
+    const gradients = [
+      "from-indigo-500/20 to-purple-500/20",
+      "from-rose-400/20 to-pink-500/20",
+      "from-blue-400/20 to-cyan-500/20",
+      "from-emerald-400/20 to-green-500/20",
+      "from-orange-400/20 to-amber-500/20"
+    ];
+    const accent = gradients[Math.floor(Math.random() * gradients.length)];
+
+    const card = document.createElement("div");
+    card.className =
+      "glass rounded-2xl p-6 shadow-lg border border-white/30 dark:border-white/10 " +
+      "bg-gradient-to-br " + accent +
+      " transition hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.01]";
+
+    card.innerHTML = `
+      <h2 class="text-xl font-bold mb-1">${ev.name}</h2>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Event ID: ${ev.id}</p>
+      <p class="text-xs text-gray-500 dark:text-gray-500 mb-4">Created: ${ev.created_at}</p>
+
+      <div class="flex flex-col gap-3 mt-4">
+        <a href="${eventUrl}"
+          class="text-center bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow transition">
+          📸 Open Upload Page
+        </a>
+
+        <a href="${galleryUrl}"
+          class="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg shadow transition">
+          🖼 View Gallery
+        </a>
+      </div>
     `;
 
-    body.appendChild(tr);
+    grid.appendChild(card);
   });
 }
 </script>
