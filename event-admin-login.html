@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" class="dark:bg-black dark:text-white">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Event Admin Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .glass {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .dark .glass {
+      background: rgba(30, 30, 30, 0.4);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+
+  <div class="glass p-8 rounded-2xl shadow-xl max-w-md w-full border border-white/20">
+
+    <h1 class="text-3xl font-bold mb-6 text-center">
+      🔐 Event Admin Login
+    </h1>
+
+    <div class="space-y-4">
+
+      <div>
+        <label class="font-semibold">Event ID</label>
+        <input id="eventId"
+               class="mt-1 w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-black/30 border border-gray-300 dark:border-gray-700 focus:ring focus:ring-indigo-300"
+               placeholder="EVT12345">
+      </div>
+
+      <div>
+        <label class="font-semibold">Email</label>
+        <input id="email"
+               class="mt-1 w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-black/30 border border-gray-300 dark:border-gray-700 focus:ring focus:ring-indigo-300"
+               placeholder="admin@example.com">
+      </div>
+
+      <div>
+        <label class="font-semibold">Password</label>
+        <input id="password" type="password"
+               class="mt-1 w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-black/30 border border-gray-300 dark:border-gray-700 focus:ring focus:ring-indigo-300"
+               placeholder="************">
+      </div>
+
+      <button onclick="login()"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold shadow transition">
+        Login
+      </button>
+
+      <p id="status" class="text-center text-red-500 mt-2"></p>
+    </div>
+
+  </div>
+
+<script>
+async function login() {
+  const eventId = document.getElementById("eventId").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  const status = document.getElementById("status");
+  status.textContent = "";
+
+  if (!eventId || !email || !password) {
+    status.textContent = "All fields required.";
+    return;
+  }
+
+  // Try login by calling list-files
+  const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/list-files", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ eventId, email, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    status.textContent = data.error || "Invalid login";
+    return;
+  }
+
+  // Save session
+  sessionStorage.setItem("eventId", eventId);
+  sessionStorage.setItem("email", email);
+  sessionStorage.setItem("password", password);
+
+  window.location.href = "event-admin-dashboard.html";
+}
+</script>
+
+</body>
+</html>
