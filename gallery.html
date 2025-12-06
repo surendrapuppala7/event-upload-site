@@ -1,18 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="dark:bg-black dark:text-white">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gallery</title>
+  <title>Event Gallery</title>
   <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen p-6">
-  <h1 class="text-3xl font-bold">Event Gallery</h1>
-  <p class="text-gray-600 mt-2">Gallery for event will load here.</p>
 
-  <script>
-    const params = new URLSearchParams(location.search);
-    const eventId = params.get("eventId");
-    console.log("Gallery opened for event:", eventId);
-  </script>
+  <style>
+    .img-card {
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .img-card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen p-6">
+
+<h1 class="text-3xl font-bold mb-4">🖼 Event Gallery</h1>
+<p id="info" class="text-gray-600 dark:text-gray-400 mb-4"></p>
+
+<div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+
+<!-- Preview Modal -->
+<div id="modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
+  <img id="modalImg" class="max-h-[90vh] rounded-lg shadow-xl">
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const eventId = params.get("eventId");
+
+document.getElementById("info").textContent =
+  "Loading gallery for event ID: " + eventId + "...";
+
+// Load file list
+async function loadFiles() {
+  const res = await fetch(
+    "https://event-upload-api.surendra-david-puppala.workers.dev/list?eventId=" +
+      encodeURIComponent(eventId)
+  );
+
+  if (!res.ok) {
+    document.getElementById("info").textContent = "❌ Failed to load gallery.";
+    return;
+  }
+
+  const data = await res.json();
+  const files = data.files || [];
+
+  if (files.length === 0) {
+    document.getElementById("info").textContent = "No uploads yet.";
+    return;
+  }
+
+  document.getElementById("info").textContent = "";
+
+  const grid = document.getElementById("grid");
+
+  files.forEach(file => {
+    const url =
+      "https://event-upload-api.surendra-david-puppala.workers.dev/media?eventId=" +
+      eventId + "&file=" + encodeURIComponent(file.name);
+
+    const card = document.createElement("img");
+    card.src = url;
+    card.className = "rounded-lg img-card";
+    card.onclick = () => openModal(url);
+
+    grid.appendChild(card);
+  });
+}
+
+function openModal(src) {
+  const modal = document.getElementById("modal");
+  const modalImg = document.getElementById("modalImg");
+
+  modalImg.src = src;
+  modal.classList.remove("hidden");
+
+  modal.onclick = () => modal.classList.add("hidden");
+}
+
+loadFiles();
+</script>
+
 </body>
 </html>
