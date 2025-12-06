@@ -80,10 +80,10 @@ async function loadEvents() {
   status.textContent = "";
 
   events.forEach(ev => {
-    const eventUrl = location.origin + "/event.html?eventId=" + ev.id;
-    const galleryUrl = location.origin + "/gallery.html?eventId=" + ev.id;
+    const eventUrl = "/event.html?eventId=" + ev.id;
+    const galleryUrl = "/gallery.html?eventId=" + ev.id;
 
-    // Subtle gradient accent - dynamically assigned but soft
+    // soft modern gradients
     const gradients = [
       "from-indigo-500/20 to-purple-500/20",
       "from-rose-400/20 to-pink-500/20",
