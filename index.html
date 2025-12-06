@@ -1,15 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Event Upload Platform</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="font-family: sans-serif; padding:20px; text-align:center;">
 
-<h1>Event Upload Platform</h1>
-<p>Create events, generate QR codes, and let guests upload photos/videos.</p>
+<body class="bg-gray-50 flex flex-col items-center min-h-screen">
 
-<a href="create-event.html">Create New Event</a>
+  <!-- Header -->
+  <header class="w-full bg-white shadow-md py-4 mb-8">
+    <h1 class="text-2xl font-bold text-center text-gray-800">📸 Event Upload Platform</h1>
+  </header>
+
+  <!-- Container -->
+  <main class="w-full max-w-md mx-auto px-6">
+    <p class="text-gray-600 text-center mb-8">
+      Create events, generate QR codes, and let guests upload photos & videos instantly.
+    </p>
+
+    <!-- Buttons -->
+    <div class="space-y-4">
+
+      <a href="create-event.html"
+         class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow transition">
+         ➕ Create New Event
+      </a>
+
+      <a href="manage-events.html"
+         class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition">
+         📋 Manage My Events
+      </a>
+
+      <a href="event.html?eventId=test123"
+         class="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl shadow transition">
+         📸 Test Upload Page
+      </a>
+
+      <!-- Future login -->
+      <!--
+      <a href="admin-login.html"
+         class="block w-full text-center bg-gray-800 hover:bg-black text-white font-semibold py-3 rounded-xl shadow transition">
+         🔐 Admin Login
+      </a>
+      -->
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto py-6 text-gray-400 text-sm">
+    Built with ❤️ using Cloudflare Workers, R2, and D1.
+  </footer>
 
 </body>
 </html>
