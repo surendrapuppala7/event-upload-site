@@ -1,101 +1,75 @@
 <!DOCTYPE html>
 <html lang="en" class="dark:bg-black dark:text-white">
 <head>
-  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Event Admin Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    .glass {
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      background: rgba(255, 255, 255, 0.2);
-    }
-    .dark .glass {
-      background: rgba(30, 30, 30, 0.4);
-    }
-  </style>
 </head>
 
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex justify-center items-center p-6">
 
-  <div class="glass p-8 rounded-2xl shadow-xl max-w-md w-full border border-white/20">
+<div class="w-full max-w-md bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-8">
+  <h1 class="text-2xl font-bold text-center mb-6">🔐 Event Admin Login</h1>
 
-    <h1 class="text-3xl font-bold mb-6 text-center">
-      🔐 Event Admin Login
-    </h1>
+  <input id="eventId" placeholder="Event ID (e.g. EVT12345)"
+    class="w-full mb-3 px-4 py-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
 
-    <div class="space-y-4">
+  <input id="email" type="email" placeholder="Your Email"
+    class="w-full mb-3 px-4 py-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
 
-      <div>
-        <label class="font-semibold">Event ID</label>
-        <input id="eventId"
-               class="mt-1 w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-black/30 border border-gray-300 dark:border-gray-700 focus:ring focus:ring-indigo-300"
-               placeholder="EVT12345">
-      </div>
+  <input id="password" type="password" placeholder="Password"
+    class="w-full mb-4 px-4 py-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
 
-      <div>
-        <label class="font-semibold">Email</label>
-        <input id="email"
-               class="mt-1 w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-black/30 border border-gray-300 dark:border-gray-700 focus:ring focus:ring-indigo-300"
-               placeholder="admin@example.com">
-      </div>
+  <button onclick="login()"
+    class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold">
+    Sign In
+  </button>
 
-      <div>
-        <label class="font-semibold">Password</label>
-        <input id="password" type="password"
-               class="mt-1 w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-black/30 border border-gray-300 dark:border-gray-700 focus:ring focus:ring-indigo-300"
-               placeholder="************">
-      </div>
-
-      <button onclick="login()"
-              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold shadow transition">
-        Login
-      </button>
-
-      <p id="status" class="text-center text-red-500 mt-2"></p>
-    </div>
-
-  </div>
+  <p id="status" class="text-center mt-4 text-red-500"></p>
+</div>
 
 <script>
-const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+const params = new URLSearchParams(location.search);
+const eventIdParam = params.get("eventId");
+if (eventIdParam) {
+  const input = document.getElementById("eventId");
+  input.value = eventIdParam;
+  input.readOnly = true;
+}
 
 async function login() {
   const eventId = document.getElementById("eventId").value.trim();
   const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
+  const password = document.getElementById("password").value.trim();
   const status = document.getElementById("status");
-
-  status.textContent = "";
 
   if (!eventId || !email || !password) {
     status.textContent = "All fields required.";
     return;
   }
 
-  status.textContent = "Checking credentials...";
+  const res = await fetch(
+    "https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/login",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, email, password })
+    }
+  );
 
-  const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ eventId, email, password })
-  });
-
-  const data = await res.json().catch(() => ({}));
+  const data = await res.json();
 
   if (!res.ok) {
-    status.textContent = data.error || "Invalid login.";
+    status.textContent = data.error || "Login failed.";
     return;
   }
 
-  // Save in session
-  sessionStorage.setItem("eventId", eventId);
-  sessionStorage.setItem("email", email);
-  sessionStorage.setItem("password", password);
+  // store creds for gallery
+  localStorage.setItem("adminEventId", eventId);
+  localStorage.setItem("adminEmail", email);
+  localStorage.setItem("adminPassword", password);
 
-  window.location.href = "event-admin-dashboard.html";
+  location.href = "/gallery.html?eventId=" + encodeURIComponent(eventId);
 }
 </script>
 
