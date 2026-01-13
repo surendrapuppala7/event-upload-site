@@ -31,44 +31,70 @@
 <script>
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+
+const storedEventId = localStorage.getItem("adminEventId");
+const email = localStorage.getItem("adminEmail");
+const password = localStorage.getItem("adminPassword");
+
+if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
+}
 
 document.getElementById("eventTitle").textContent = `Event Admin: ${eventId}`;
 
 async function loadFiles() {
-  const res = await fetch(`https://event-upload-api.surendra-david-puppala.workers.dev/list?eventId=${eventId}`);
-  const data = await res.json();
-
   const grid = document.getElementById("filesGrid");
-  grid.innerHTML = "";
+  grid.innerHTML = "Loading...";
 
-  data.files.forEach(file => {
-    const url = `https://event-upload-api.surendra-david-puppala.workers.dev/media?eventId=${eventId}&file=${encodeURIComponent(file.name.replace(eventId + "/", ""))}`;
+  try {
+    const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, email, password })
+    });
+    const data = await res.json();
 
-    const ext = file.name.toLowerCase();
-
-    let preview = "";
-    if (ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp")) {
-      preview = `<img src="${url}" class="rounded-lg shadow">`;
-    } else {
-      preview = `<video src="${url}" class="rounded-lg shadow" controls></video>`;
+    if (!res.ok) {
+      grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
+      return;
     }
 
-    grid.innerHTML += `
-      <div class="p-2 border rounded-xl">
-        ${preview}
-        <a href="${url}" download class="block mt-2 text-indigo-600 underline">Download</a>
-      </div>
-    `;
-  });
+    grid.innerHTML = "";
+
+    data.files.forEach(file => {
+      const url = `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
+      const ext = file.name.toLowerCase();
+
+      let preview = "";
+      if (ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp")) {
+        preview = `<img src="${url}" class="rounded-lg shadow">`;
+      } else {
+        preview = `<video src="${url}" class="rounded-lg shadow" controls></video>`;
+      }
+
+      grid.innerHTML += `
+        <div class="p-2 border rounded-xl">
+          ${preview}
+          <a href="${url}" download class="block mt-2 text-indigo-600 underline">Download</a>
+        </div>
+      `;
+    });
+  } catch (error) {
+    console.error(error);
+    grid.innerHTML = `<p class="text-red-500">Network error. Please try again.</p>`;
+  }
 }
 
 function downloadZip() {
-  window.location = `https://event-upload-api.surendra-david-puppala.workers.dev/api/zip?eventId=${eventId}`;
+  window.location = `${API_BASE}/api/zip?eventId=${eventId}`;
 }
 
 function logout() {
-  localStorage.removeItem("eventAdminAuth");
-  location.href = "/event-admin-login.html";
+  localStorage.removeItem("adminEventId");
+  localStorage.removeItem("adminEmail");
+  localStorage.removeItem("adminPassword");
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
 }
 
 loadFiles();

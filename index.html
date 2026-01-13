@@ -8,52 +8,168 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-50 flex flex-col items-center min-h-screen">
+<body class="bg-slate-950 text-white">
+  <div class="relative isolate overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.35),_transparent_55%)]"></div>
+    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_top_right,_rgba(14,165,233,0.35),_transparent_55%)]"></div>
 
-  <!-- Header -->
-  <header class="w-full bg-white shadow-md py-4 mb-8">
-    <h1 class="text-2xl font-bold text-center text-gray-800">📸 Event Upload Platform</h1>
-  </header>
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">📸</span>
+        <span class="text-lg font-semibold">Event Upload Platform</span>
+      </div>
+      <nav class="flex items-center gap-3">
+        <a href="event-admin-login.html"
+          class="rounded-full border border-white/20 px-5 py-2 text-sm font-semibold hover:bg-white/10">
+          Sign In
+        </a>
+        <a href="create-event.html"
+          class="rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-400">
+          Sign Up
+        </a>
+      </nav>
+    </header>
 
-  <!-- Container -->
-  <main class="w-full max-w-md mx-auto px-6">
-    <p class="text-gray-600 text-center mb-8">
-      Create events, generate QR codes, and let guests upload photos & videos instantly.
-    </p>
+    <main class="max-w-6xl mx-auto px-6 pb-20 pt-8">
+      <section class="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+        <div class="space-y-6">
+          <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-indigo-100">
+            ✨ QR-first photo & video uploads for events
+          </p>
+          <h1 class="text-4xl sm:text-5xl font-bold leading-tight">
+            Gather every guest photo in seconds with a shareable QR code.
+          </h1>
+          <p class="text-lg text-slate-200">
+            Create a branded upload link, print the QR code, and let guests drop photos & videos instantly—no app download.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="create-event.html"
+              class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-6 py-3 font-semibold shadow hover:bg-indigo-400">
+              ➕ Create a Free Event
+            </a>
+            <a href="manage-events.html"
+              class="inline-flex items-center justify-center rounded-xl border border-white/20 px-6 py-3 font-semibold hover:bg-white/10">
+              📋 Manage My Events
+            </a>
+          </div>
+          <div class="flex flex-wrap gap-6 text-sm text-slate-300">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+              2x faster guest uploads
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-indigo-300"></span>
+              No app required
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-sky-300"></span>
+              Cloud backed storage
+            </div>
+          </div>
+        </div>
 
-    <!-- Buttons -->
-    <div class="space-y-4">
+        <div class="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-2xl">
+          <div class="rounded-2xl bg-gradient-to-br from-indigo-500/40 via-sky-400/30 to-emerald-400/30 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-200">Live Event</p>
+                <h2 class="text-2xl font-semibold">Surendra & Priya Wedding</h2>
+              </div>
+              <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">QR Ready</span>
+            </div>
+            <div class="mt-6 grid gap-3">
+              <div class="rounded-xl bg-white/10 p-4">
+                <p class="text-xs text-slate-200">Guest Upload Link</p>
+                <p class="mt-2 break-all text-sm text-indigo-100">event-upload-site.com/guest-upload.html?eventId=EVT-392</p>
+              </div>
+              <div class="rounded-xl bg-white/10 p-4">
+                <p class="text-xs text-slate-200">Upload Status</p>
+                <p class="mt-2 text-sm text-emerald-200">48 photos • 12 videos • Updated 2 min ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <a href="create-event.html"
-         class="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow transition">
-         ➕ Create New Event
-      </a>
+      <section class="mt-16">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-semibold">Event hosts love the experience</h2>
+          <a href="guest-upload.html?eventId=test123" class="text-sm text-indigo-200 hover:text-indigo-100">
+            🔎 Try the guest upload page
+          </a>
+        </div>
+        <div class="grid gap-6 md:grid-cols-3">
+          <article class="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <div class="flex items-center gap-4">
+              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 to-sky-400 flex items-center justify-center text-lg font-semibold">
+                AM
+              </div>
+              <div>
+                <p class="font-semibold">Aanya Mehta</p>
+                <p class="text-sm text-slate-300">Wedding Planner</p>
+              </div>
+            </div>
+            <p class="mt-4 text-sm text-slate-200">
+              “Our guests scanned the QR and uploaded instantly. We had a full gallery before dessert.”
+            </p>
+          </article>
+          <article class="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <div class="flex items-center gap-4">
+              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-lg font-semibold">
+                JR
+              </div>
+              <div>
+                <p class="font-semibold">Jordan Rivera</p>
+                <p class="text-sm text-slate-300">Corporate Events</p>
+              </div>
+            </div>
+            <p class="mt-4 text-sm text-slate-200">
+              “Setup took five minutes and the QR cards looked premium. Everyone was sharing in real time.”
+            </p>
+          </article>
+          <article class="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <div class="flex items-center gap-4">
+              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-pink-400 to-orange-400 flex items-center justify-center text-lg font-semibold">
+                SK
+              </div>
+              <div>
+                <p class="font-semibold">Sofia Kim</p>
+                <p class="text-sm text-slate-300">Birthday Host</p>
+              </div>
+            </div>
+            <p class="mt-4 text-sm text-slate-200">
+              “My friends loved that it worked right in the browser. We captured every surprise moment.”
+            </p>
+          </article>
+        </div>
+      </section>
 
-      <a href="manage-events.html"
-         class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl shadow transition">
-         📋 Manage My Events
-      </a>
+      <section class="mt-16 grid gap-6 lg:grid-cols-3">
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h3 class="text-lg font-semibold mb-2">Instant QR setup</h3>
+          <p class="text-sm text-slate-300">Create an event and generate a QR code in seconds. Print or share digitally.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h3 class="text-lg font-semibold mb-2">High-quality uploads</h3>
+          <p class="text-sm text-slate-300">Guests can upload photos and videos directly from their phones with no compression.</p>
+        </div>
+        <div class="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <h3 class="text-lg font-semibold mb-2">Admin gallery</h3>
+          <p class="text-sm text-slate-300">Review, download, and share everything from a private admin dashboard.</p>
+        </div>
+      </section>
+    </main>
+  </div>
 
-      <a href="event.html?eventId=test123"
-         class="block w-full text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-xl shadow transition">
-         📸 Test Upload Page
-      </a>
-
-      <!-- Future login -->
-      <!--
-      <a href="admin-login.html"
-         class="block w-full text-center bg-gray-800 hover:bg-black text-white font-semibold py-3 rounded-xl shadow transition">
-         🔐 Admin Login
-      </a>
-      -->
-
+  <footer class="border-t border-white/10 bg-slate-950/70">
+    <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-slate-400 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <p>Built with ❤️ using Cloudflare Workers, R2, and D1.</p>
+      <div class="flex gap-4">
+        <a href="create-event.html" class="hover:text-white">Create Event</a>
+        <a href="manage-events.html" class="hover:text-white">Manage Events</a>
+        <a href="super-admin-login.html" class="hover:text-white">Admin</a>
+      </div>
     </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="mt-auto py-6 text-gray-400 text-sm">
-    Built with ❤️ using Cloudflare Workers, R2, and D1.
   </footer>
-
 </body>
 </html>

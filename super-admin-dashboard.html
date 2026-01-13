@@ -34,6 +34,7 @@
 
 <script>
 const superPassword = localStorage.getItem("superAdminPassword");
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 if (!superPassword) {
   location.href = "/super-admin-login.html";
 }
@@ -50,25 +51,31 @@ async function createAdmin() {
     return;
   }
 
-  const res = await fetch(
-    "https://event-upload-api.surendra-david-puppala.workers.dev/api/super-admin/create-event-admin",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ superPassword, eventId, email, password })
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/super-admin/create-event-admin`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ superPassword, eventId, email, password })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      status.textContent = data.error || "Error creating admin.";
+      status.className = "mt-4 text-sm text-red-400";
+      return;
     }
-  );
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    status.textContent = data.error || "Error creating admin.";
+    status.textContent = "✅ Event admin created successfully.";
+    status.className = "mt-4 text-sm text-green-400";
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Network error. Please try again.";
     status.className = "mt-4 text-sm text-red-400";
-    return;
   }
-
-  status.textContent = "✅ Event admin created successfully.";
-  status.className = "mt-4 text-sm text-green-400";
 }
 </script>
 
