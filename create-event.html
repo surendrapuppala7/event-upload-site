@@ -26,22 +26,22 @@
 
       <!-- EVENT NAME -->
       <div>
-        <label class="font-semibold text-gray-700">Event Name</label>
-        <input id="eventName"
+        <label for="eventName" class="font-semibold text-gray-700">Event Name</label>
+        <input id="eventName" name="eventName" type="text" required
           class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring focus:ring-indigo-300"
           placeholder="e.g. John's Birthday Party">
       </div>
 
       <!-- OWNER EMAIL -->
       <div>
-        <label class="font-semibold text-gray-700">Owner Email</label>
-        <input id="ownerEmail"
+        <label for="ownerEmail" class="font-semibold text-gray-700">Owner Email</label>
+        <input id="ownerEmail" name="ownerEmail" type="email" required
           class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring focus:ring-indigo-300"
           placeholder="your@email.com">
       </div>
 
       <!-- BUTTON -->
-      <button onclick="generate()"
+      <button id="createEventButton" onclick="generate()"
         class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-indigo-700 transition">
         ➕ Create Event
       </button>
@@ -64,11 +64,14 @@
   </main>
 
 <script>
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+
 async function generate() {
   const name = document.getElementById("eventName").value.trim();
   const owner = document.getElementById("ownerEmail").value.trim();
   const status = document.getElementById("status");
   const qrSection = document.getElementById("qrSection");
+  const button = document.getElementById("createEventButton");
 
   if (!name || !owner) {
     status.textContent = "⚠️ Please enter both event name and owner email.";
@@ -76,35 +79,43 @@ async function generate() {
   }
 
   status.textContent = "⏳ Creating event...";
+  button.disabled = true;
 
-  // Call Worker API
-  const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/api/create-event", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, owner })
-  });
+  try {
+    // Call Worker API
+    const res = await fetch(`${API_BASE}/api/create-event`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, owner })
+    });
 
-  if (!res.ok) {
-    status.textContent = "❌ Error creating event.";
-    return;
+    if (!res.ok) {
+      status.textContent = "❌ Error creating event.";
+      return;
+    }
+
+    const data = await res.json();
+    const eventId = data.eventId;
+
+    status.textContent = "✅ Event created!";
+    qrSection.classList.remove("hidden");
+
+    // Final guest upload page
+    const eventUrl = location.origin + "/guest-upload.html?eventId=" + eventId;
+
+    document.getElementById("eventTitle").textContent = name;
+    document.getElementById("eventLink").textContent = eventUrl;
+
+    // Generate QR Code
+    QRCode.toCanvas(document.getElementById("qrCanvas"), eventUrl, (err) => {
+      if (err) console.error(err);
+    });
+  } catch (error) {
+    console.error(error);
+    status.textContent = "❌ Network error. Please try again.";
+  } finally {
+    button.disabled = false;
   }
-
-  const data = await res.json();
-  const eventId = data.eventId;
-
-  status.textContent = "✅ Event created!";
-  qrSection.classList.remove("hidden");
-
-  // Final guest upload page
-  const eventUrl = location.origin + "/guest-upload.html?eventId=" + eventId;
-
-  document.getElementById("eventTitle").textContent = name;
-  document.getElementById("eventLink").textContent = eventUrl;
-
-  // Generate QR Code
-  QRCode.toCanvas(document.getElementById("qrCanvas"), eventUrl, (err) => {
-    if (err) console.error(err);
-  });
 }
 </script>
 

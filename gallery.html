@@ -38,12 +38,14 @@
 
 <!-- Preview Modal -->
 <div id="modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
-  <img id="modalImg" class="max-h-[90vh] rounded-lg shadow-xl">
+  <img id="modalImg" class="max-h-[90vh] rounded-lg shadow-xl hidden">
+  <video id="modalVideo" class="max-h-[90vh] rounded-lg shadow-xl hidden" controls></video>
 </div>
 
 <script>
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
 const storedEventId = localStorage.getItem("adminEventId");
 const email = localStorage.getItem("adminEmail");
@@ -63,71 +65,86 @@ async function loadFiles() {
 
   grid.innerHTML = "Loading...";
 
-  const res = await fetch(
-    "https://event-upload-api.surendra-david-puppala.workers.dev/api/event-admin/list-files",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId, email, password })
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/event-admin/list-files`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId, email, password })
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
+      return;
     }
-  );
 
-  const data = await res.json();
+    const files = data.files || [];
+    if (files.length === 0) {
+      info.textContent = "No uploads yet for this event.";
+      grid.innerHTML = "";
+      return;
+    }
 
-  if (!res.ok) {
-    grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
-    return;
-  }
-
-  const files = data.files || [];
-  if (files.length === 0) {
-    info.textContent = "No uploads yet for this event.";
+    info.textContent = `Showing ${files.length} file(s) for event ${eventId}.`;
     grid.innerHTML = "";
-    return;
-  }
 
-  info.textContent = `Showing ${files.length} file(s) for event ${eventId}.`;
-  grid.innerHTML = "";
+    files.forEach(file => {
+      const url =
+        `${API_BASE}/media?eventId=` +
+        encodeURIComponent(eventId) +
+        "&file=" +
+        encodeURIComponent(file.name);
 
-  files.forEach(file => {
-    const url =
-      "https://event-upload-api.surendra-david-puppala.workers.dev/media?eventId=" +
-      encodeURIComponent(eventId) +
-      "&file=" +
-      encodeURIComponent(file.name);
+      const card = document.createElement("div");
+      card.className = "rounded-lg overflow-hidden bg-gray-900 img-card";
 
-    const card = document.createElement("div");
-    card.className = "rounded-lg overflow-hidden bg-gray-900 img-card";
+      const isVideo = file.name.toLowerCase().endsWith(".mp4");
+      const inner = isVideo
+        ? `
+          <video controls class="w-full h-40 object-cover bg-black">
+            <source src="${url}" type="video/mp4">
+          </video>
+        `
+        : `<img src="${url}" class="w-full h-40 object-cover">`;
 
-    let inner;
-    if (file.name.toLowerCase().endsWith(".mp4")) {
-      inner = `
-        <video controls class="w-full h-40 object-cover bg-black">
-          <source src="${url}" type="video/mp4">
-        </video>
+      card.innerHTML = inner + `
+        <div class="p-2 text-xs text-gray-300 truncate">${file.name}</div>
       `;
-    } else {
-      inner = `<img src="${url}" class="w-full h-40 object-cover">`;
-    }
 
-    card.innerHTML = inner + `
-      <div class="p-2 text-xs text-gray-300 truncate">${file.name}</div>
-    `;
-
-    card.onclick = () => openModal(url);
-    grid.appendChild(card);
-  });
+      card.onclick = () => openModal(url, isVideo);
+      grid.appendChild(card);
+    });
+  } catch (error) {
+    console.error(error);
+    grid.innerHTML = `<p class="text-red-500">Network error. Please try again.</p>`;
+  }
 }
 
-function openModal(src) {
+function openModal(src, isVideo) {
   const modal = document.getElementById("modal");
   const modalImg = document.getElementById("modalImg");
+  const modalVideo = document.getElementById("modalVideo");
 
-  modalImg.src = src;
+  if (isVideo) {
+    modalImg.classList.add("hidden");
+    modalVideo.classList.remove("hidden");
+    modalVideo.src = src;
+  } else {
+    modalVideo.classList.add("hidden");
+    modalImg.classList.remove("hidden");
+    modalImg.src = src;
+  }
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 
-  modal.onclick = () => modal.classList.add("hidden");
+  modal.onclick = () => {
+    modal.classList.add("hidden");
+    modalVideo.pause();
+  };
 }
 
 function logout() {
