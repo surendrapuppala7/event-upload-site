@@ -27,7 +27,8 @@
   </header>
 
   <div class="max-w-lg mx-auto mb-8">
-    <input id="ownerEmail" type="email"
+    <label for="ownerEmail" class="sr-only">Owner email</label>
+    <input id="ownerEmail" type="email" required
       class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700
              bg-white dark:bg-gray-900 focus:ring focus:ring-indigo-300 dark:focus:ring-indigo-800"
       placeholder="Enter your email (same as event creation)">
@@ -47,6 +48,7 @@ async function loadEvents() {
   const email = document.getElementById("ownerEmail").value.trim();
   const status = document.getElementById("status");
   const grid = document.getElementById("eventsGrid");
+  const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
   if (!email) {
     status.textContent = "⚠️ Please enter your email.";
@@ -56,23 +58,23 @@ async function loadEvents() {
   status.textContent = "⏳ Loading events...";
   grid.innerHTML = "";
 
-  const res = await fetch(
-    "https://event-upload-api.surendra-david-puppala.workers.dev/api/list-events?owner=" +
-      encodeURIComponent(email)
-  );
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/list-events?owner=` + encodeURIComponent(email)
+    );
 
-  if (!res.ok) {
-    status.textContent = "❌ Error loading events.";
-    return;
-  }
+    if (!res.ok) {
+      status.textContent = "❌ Error loading events.";
+      return;
+    }
 
-  const data = await res.json();
-  const events = data.events || [];
+    const data = await res.json();
+    const events = data.events || [];
 
-  if (events.length === 0) {
-    status.textContent = "No events found for this email.";
-    return;
-  }
+    if (events.length === 0) {
+      status.textContent = "No events found for this email.";
+      return;
+    }
 
   status.textContent = "";
   grid.innerHTML = "";
@@ -85,8 +87,8 @@ async function loadEvents() {
     "from-orange-400/20 to-amber-500/20"
   ];
 
-  events.forEach(ev => {
-    const uploadUrl = location.origin + "/event.html?eventId=" + ev.id;
+    events.forEach(ev => {
+      const uploadUrl = location.origin + "/guest-upload.html?eventId=" + ev.id;
     const adminLoginUrl = location.origin + "/event-admin-login.html?eventId=" + ev.id;
 
     const accent = gradients[Math.floor(Math.random() * gradients.length)];
@@ -115,8 +117,12 @@ async function loadEvents() {
       </div>
     `;
 
-    grid.appendChild(card);
-  });
+      grid.appendChild(card);
+    });
+  } catch (error) {
+    console.error(error);
+    status.textContent = "❌ Network error. Please try again.";
+  }
 }
 </script>
 

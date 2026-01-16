@@ -39,6 +39,7 @@
 // Read eventId from URL
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
 if (!eventId) {
   document.getElementById("eventName").innerText = "Invalid event link";
@@ -53,6 +54,16 @@ async function uploadFile(file) {
   const status = document.getElementById("status");
   const spinner = document.getElementById("spinner");
 
+  if (!file) {
+    status.textContent = "⚠️ No file selected.";
+    return;
+  }
+
+  if (!eventId) {
+    status.textContent = "❌ Missing event ID.";
+    return;
+  }
+
   spinner.classList.remove("hidden");
   status.textContent = "";
 
@@ -60,18 +71,25 @@ async function uploadFile(file) {
   form.append("file", file);
   form.append("eventId", eventId);
 
-  const res = await fetch("https://event-upload-api.surendra-david-puppala.workers.dev/", {
-    method: "POST",
-    body: form
-  });
+  try {
+    const res = await fetch(`${API_BASE}/`, {
+      method: "POST",
+      body: form
+    });
 
-  spinner.classList.add("hidden");
+    spinner.classList.add("hidden");
 
-  if (res.ok) {
-    status.textContent = "✅ Uploaded successfully! Thank you!";
-    status.className = "mt-6 text-lg font-semibold text-green-500 text-center";
-  } else {
-    status.textContent = "❌ Upload failed. Please try again.";
+    if (res.ok) {
+      status.textContent = "✅ Uploaded successfully! Thank you!";
+      status.className = "mt-6 text-lg font-semibold text-green-500 text-center";
+    } else {
+      status.textContent = "❌ Upload failed. Please try again.";
+      status.className = "mt-6 text-lg font-semibold text-red-500 text-center";
+    }
+  } catch (error) {
+    console.error(error);
+    spinner.classList.add("hidden");
+    status.textContent = "❌ Network error. Please try again.";
     status.className = "mt-6 text-lg font-semibold text-red-500 text-center";
   }
 }
