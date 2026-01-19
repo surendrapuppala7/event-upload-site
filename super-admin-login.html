@@ -8,10 +8,10 @@
 
 <body class="min-h-screen">
   <div class="relative isolate overflow-hidden min-h-screen">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.22),_transparent_60%)]"></div>
-    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.18),_transparent_60%)]"></div>
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.25),_transparent_60%)]"></div>
+    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.25),_transparent_60%)]"></div>
 
-    <header class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-2xl">🌐</span>
         <span class="text-lg font-semibold">Super Admin</span>
@@ -19,38 +19,56 @@
       <a href="index.html" class="text-sm text-slate-300 hover:text-white">Back to Home</a>
     </header>
 
-    <main class="max-w-xl mx-auto px-6 pb-16">
-      <div class="text-center space-y-3">
-        <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Privileged Access</p>
-        <h1 class="text-3xl font-semibold">Securely manage event administrators.</h1>
-        <p class="text-slate-300">Enter your super admin password to continue.</p>
-      </div>
+    <main class="max-w-6xl mx-auto px-6 py-12">
+      <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] items-start">
+        <section class="space-y-6">
+          <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+            Enterprise access control
+          </p>
+          <h1 class="text-4xl font-semibold leading-tight">Securely manage event administrators.</h1>
+          <p class="text-slate-300">
+            Super admins can create event admins, monitor activity, and maintain full operational control.
+          </p>
+          <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+            <p class="text-sm font-semibold">Security notice</p>
+            <p class="text-sm text-slate-300 mt-2">Use your dedicated super admin password for access.</p>
+          </div>
+        </section>
+  <label for="password" class="sr-only">Super admin password</label>
+  <input
+    id="password"
+    type="password"
+    required
+    placeholder="Enter Super Admin Password"
+    class="w-full px-4 py-3 border rounded-xl mb-4"
+  >
 
-      <section class="mt-10 bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
-        <h2 class="text-2xl font-semibold">Super admin sign in</h2>
-        <p class="mt-2 text-sm text-slate-500">Provide your privileged credentials.</p>
+        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
+          <h2 class="text-2xl font-semibold">Super admin sign in</h2>
+          <p class="mt-2 text-sm text-slate-500">Enter your privileged credentials.</p>
 
-        <div class="mt-6 space-y-4">
-          <div>
-            <label for="password" class="text-sm font-semibold text-slate-700">Password</label>
-            <input
-              id="password"
-              type="password"
-              required
-              placeholder="Enter Super Admin Password"
-              class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-            >
+          <div class="mt-6 space-y-4">
+            <div>
+              <label for="password" class="text-sm font-semibold text-slate-700">Password</label>
+              <input
+                id="password"
+                type="password"
+                required
+                placeholder="Enter Super Admin Password"
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              >
+            </div>
+
+            <button
+              onclick="login()"
+              class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
+              Login
+            </button>
           </div>
 
-          <button
-            onclick="login()"
-            class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
-            Login
-          </button>
-        </div>
-
-        <p id="status" class="mt-4 text-center text-sm font-medium text-rose-500"></p>
-      </section>
+          <p id="status" class="mt-4 text-center text-sm font-medium text-rose-500"></p>
+        </section>
+      </div>
     </main>
   </div>
 

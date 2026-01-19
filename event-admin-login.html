@@ -8,57 +8,97 @@
 
 <body class="min-h-screen">
   <div class="relative isolate overflow-hidden min-h-screen">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.22),_transparent_60%)]"></div>
-    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.18),_transparent_60%)]"></div>
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.25),_transparent_55%)]"></div>
+    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.25),_transparent_55%)]"></div>
 
-    <header class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-2xl">🔐</span>
-        <span class="text-lg font-semibold">Event Admin</span>
+        <span class="text-lg font-semibold">Event Admin Portal</span>
       </div>
       <a href="index.html" class="text-sm text-slate-300 hover:text-white">Back to Home</a>
     </header>
 
-    <main class="max-w-xl mx-auto px-6 pb-16">
-      <div class="text-center space-y-3">
-        <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Admin Access</p>
-        <h1 class="text-3xl font-semibold">Sign in to manage your event uploads.</h1>
-        <p class="text-slate-300">Access the private gallery and download event media.</p>
+    <main class="max-w-6xl mx-auto px-6 py-10">
+      <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-start">
+        <section class="space-y-6">
+          <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+            Secure access for event managers
+          </p>
+          <h1 class="text-4xl font-semibold leading-tight">Review your event uploads with enterprise-grade control.</h1>
+          <p class="text-slate-300">
+            Sign in with your event admin credentials to access the private gallery and download all media assets.
+          </p>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Private gallery</p>
+              <p class="text-sm text-slate-300 mt-2">View every upload in one secure grid.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Instant downloads</p>
+              <p class="text-sm text-slate-300 mt-2">Download files or full event ZIPs instantly.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
+          <h2 class="text-2xl font-semibold">Admin sign in</h2>
+          <p class="mt-2 text-sm text-slate-500">Enter your event credentials.</p>
+
+          <div class="mt-6 space-y-4">
+            <div>
+              <label for="eventId" class="text-sm font-semibold text-slate-700">Event ID</label>
+              <input id="eventId" placeholder="Event ID (e.g. EVT12345)" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+
+            <div>
+              <label for="email" class="text-sm font-semibold text-slate-700">Email</label>
+              <input id="email" type="email" placeholder="Your Email" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+
+            <div>
+              <label for="password" class="text-sm font-semibold text-slate-700">Password</label>
+              <input id="password" type="password" placeholder="Password" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+
+            <button onclick="login()"
+              class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
+              Sign In
+            </button>
+          </div>
+
+          <p id="status" class="mt-4 text-center text-sm font-medium text-rose-500"></p>
+        </section>
       </div>
-
-      <section class="mt-10 bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
-        <h2 class="text-2xl font-semibold">Admin sign in</h2>
-        <p class="mt-2 text-sm text-slate-500">Enter your event credentials.</p>
-
-        <div class="mt-6 space-y-4">
-          <div>
-            <label for="eventId" class="text-sm font-semibold text-slate-700">Event ID</label>
-            <input id="eventId" placeholder="Event ID (e.g. EVT12345)" required
-              class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-          </div>
-
-          <div>
-            <label for="email" class="text-sm font-semibold text-slate-700">Email</label>
-            <input id="email" type="email" placeholder="Your Email" required
-              class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-          </div>
-
-          <div>
-            <label for="password" class="text-sm font-semibold text-slate-700">Password</label>
-            <input id="password" type="password" placeholder="Password" required
-              class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-          </div>
-
-          <button onclick="login()"
-            class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
-            Sign In
-          </button>
-        </div>
-
-        <p id="status" class="mt-4 text-center text-sm font-medium text-rose-500"></p>
-      </section>
     </main>
   </div>
+<body class="min-h-screen flex justify-center items-center p-6">
+
+<div class="w-full max-w-md bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-8">
+  <h1 class="text-2xl font-bold text-center mb-6">🔐 Event Admin Login</h1>
+
+  <label for="eventId" class="sr-only">Event ID</label>
+  <input id="eventId" placeholder="Event ID (e.g. EVT12345)" required
+    class="w-full mb-3 px-4 py-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+
+  <label for="email" class="sr-only">Email</label>
+  <input id="email" type="email" placeholder="Your Email" required
+    class="w-full mb-3 px-4 py-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+
+  <label for="password" class="sr-only">Password</label>
+  <input id="password" type="password" placeholder="Password" required
+    class="w-full mb-4 px-4 py-3 rounded-xl border dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+
+  <button onclick="login()"
+    class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold">
+    Sign In
+  </button>
+
+  <p id="status" class="text-center mt-4 text-red-500"></p>
+</div>
 
 <script>
 const params = new URLSearchParams(location.search);
@@ -98,6 +138,7 @@ async function login() {
       return;
     }
 
+    // store creds for gallery
     localStorage.setItem("adminEventId", eventId);
     localStorage.setItem("adminEmail", email);
     localStorage.setItem("adminPassword", password);

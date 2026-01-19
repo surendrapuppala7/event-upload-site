@@ -8,55 +8,75 @@
 
 <body class="min-h-screen">
   <div class="relative isolate overflow-hidden min-h-screen">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.22),_transparent_60%)]"></div>
-    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.18),_transparent_60%)]"></div>
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_60%)]"></div>
+    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.2),_transparent_60%)]"></div>
 
-    <header class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-2xl">🌐</span>
         <span class="text-lg font-semibold">Super Admin Dashboard</span>
       </div>
-      <a href="index.html" class="text-sm text-slate-300 hover:text-white">Back to Home</a>
+      <div class="flex items-center gap-4 text-sm text-slate-300">
+        <span>Role: Super Admin</span>
+        <a href="index.html" class="hover:text-white">Home</a>
+      </div>
     </header>
 
-    <main class="max-w-3xl mx-auto px-6 pb-16">
-      <div class="text-center space-y-3">
-        <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Admin Provisioning</p>
-        <h1 class="text-3xl font-semibold">Create and manage event admins.</h1>
-        <p class="text-slate-300">Provision access for event managers with secure credentials.</p>
+    <main class="max-w-6xl mx-auto px-6 pb-16 pt-4">
+      <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] items-start">
+        <section class="space-y-6">
+          <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+            Create and manage event administrators
+          </p>
+          <h1 class="text-4xl font-semibold leading-tight">Provision trusted event admins quickly.</h1>
+          <p class="text-slate-300">
+            Create admin accounts for event teams and keep access controlled with secure credentials.
+          </p>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Role-based access</p>
+              <p class="text-sm text-slate-300 mt-2">Admins only see their assigned event data.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Rapid onboarding</p>
+              <p class="text-sm text-slate-300 mt-2">Create credentials and share access in minutes.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
+          <h2 class="text-2xl font-semibold">Create Event Admin</h2>
+          <p class="mt-2 text-sm text-slate-500">Fill in the details below to generate access.</p>
+
+          <div class="mt-6 space-y-4">
+            <div>
+              <label for="eventId" class="text-sm font-semibold text-slate-700">Event ID</label>
+              <input id="eventId" placeholder="Event ID (e.g. EVT12345)" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+
+            <div>
+              <label for="email" class="text-sm font-semibold text-slate-700">Admin Email</label>
+              <input id="email" type="email" placeholder="Admin Email" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+
+            <div>
+              <label for="password" class="text-sm font-semibold text-slate-700">Admin Password</label>
+              <input id="password" type="password" placeholder="Admin Password (12+ chars, strong)" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            </div>
+
+            <button onclick="createAdmin()"
+              class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
+              ➕ Create Event Admin
+            </button>
+          </div>
+
+          <p id="status" class="mt-4 text-center text-sm font-medium"></p>
+        </section>
       </div>
-
-      <section class="mt-10 bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
-        <h2 class="text-2xl font-semibold">Create Event Admin</h2>
-        <p class="mt-2 text-sm text-slate-500">Fill in the details below to generate access.</p>
-
-        <div class="mt-6 space-y-4">
-          <div>
-            <label for="eventId" class="text-sm font-semibold text-slate-700">Event ID</label>
-            <input id="eventId" placeholder="Event ID (e.g. EVT12345)" required
-              class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-          </div>
-
-          <div>
-            <label for="email" class="text-sm font-semibold text-slate-700">Admin Email</label>
-            <input id="email" type="email" placeholder="Admin Email" required
-              class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-          </div>
-
-          <div>
-            <label for="password" class="text-sm font-semibold text-slate-700">Admin Password</label>
-            <input id="password" type="password" placeholder="Admin Password (12+ chars, strong)" required
-              class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200">
-          </div>
-
-          <button onclick="createAdmin()"
-            class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
-            ➕ Create Event Admin
-          </button>
-        </div>
-
-        <p id="status" class="mt-4 text-center text-sm font-medium"></p>
-      </section>
     </main>
   </div>
 
@@ -94,6 +114,7 @@ async function createAdmin() {
     if (!res.ok) {
       status.textContent = data.error || "Error creating admin.";
       status.className = "mt-4 text-sm text-rose-500";
+      status.className = "mt-4 text-sm text-red-400";
       return;
     }
 
@@ -103,6 +124,11 @@ async function createAdmin() {
     console.error(error);
     status.textContent = "Network error. Please try again.";
     status.className = "mt-4 text-sm text-rose-500";
+    status.className = "mt-4 text-sm text-green-400";
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Network error. Please try again.";
+    status.className = "mt-4 text-sm text-red-400";
   }
 }
 </script>
