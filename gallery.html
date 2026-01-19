@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" class="bg-slate-950 text-white">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Event Gallery (Admin)</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    .img-card {
+    .media-card {
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .img-card:hover {
-      transform: translateY(-2px) scale(1.01);
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.45);
+    .media-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.55);
     }
   </style>
 </head>
@@ -20,215 +20,218 @@
 <body class="min-h-screen">
   <div class="relative isolate overflow-hidden min-h-screen">
     <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.25),_transparent_60%)]"></div>
-    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.18),_transparent_60%)]"></div>
 
+    <!-- HEADER -->
     <header class="max-w-6xl mx-auto px-6 py-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p class="text-sm uppercase tracking-wide text-slate-300">Event Admin Gallery</p>
-        <h1 class="text-3xl font-semibold">Your event uploads</h1>
-        <p id="info" class="text-sm text-slate-300 mt-2"></p>
+        <p class="text-xs uppercase tracking-wide text-slate-400">
+          Event admin
+        </p>
+        <h1 class="text-3xl font-semibold">
+          Event gallery
+        </h1>
+        <p id="info" class="mt-2 text-sm text-slate-300"></p>
       </div>
-      <div class="flex flex-wrap gap-3">
-        <button onclick="loadFiles()"
-          class="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20">
-          🔄 Refresh
+
+      <div class="flex gap-3">
+        <button id="refreshBtn"
+          class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20 transition">
+          Refresh
         </button>
-        <button onclick="logout()"
-          class="inline-flex items-center gap-2 rounded-xl bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500">
-          🚪 Logout
+        <button id="logoutBtn"
+          class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold hover:bg-rose-500 transition">
+          Logout
         </button>
       </div>
     </header>
 
+    <!-- MAIN -->
     <main class="max-w-6xl mx-auto px-6 pb-16">
-      <div id="grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+      <div id="grid"
+           class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      </div>
     </main>
   </div>
 
-  <div id="modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
-    <div class="max-w-4xl w-full bg-slate-900/90 rounded-2xl border border-white/10 p-4">
+  <!-- PREVIEW MODAL -->
+  <div id="modal"
+       class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4">
+    <div class="w-full max-w-5xl rounded-2xl bg-slate-900 border border-white/10 p-4">
       <div class="flex items-center justify-between mb-3">
         <p class="text-sm text-slate-300">Preview</p>
-        <button id="closeModal" class="text-sm text-slate-300 hover:text-white">Close</button>
+        <button id="closeModal"
+          class="text-sm text-slate-300 hover:text-white">
+          Close
+        </button>
       </div>
-      <img id="modalImg" class="max-h-[75vh] w-full rounded-lg hidden" alt="Preview image">
-      <video id="modalVideo" class="max-h-[75vh] w-full rounded-lg hidden" controls></video>
+
+      <img id="modalImg"
+           class="hidden max-h-[75vh] w-full rounded-lg object-contain"
+           alt="Preview image" />
+
+      <video id="modalVideo"
+             class="hidden max-h-[75vh] w-full rounded-lg"
+             controls></video>
     </div>
   </div>
-<body class="min-h-screen p-6">
-
-<h1 class="text-3xl font-bold mb-2">🖼 Event Gallery (Admin)</h1>
-<p id="info" class="text-gray-600 dark:text-gray-400 mb-4"></p>
-
-<div class="flex gap-4 mb-4">
-  <button onclick="loadFiles()"
-    class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow">
-    🔄 Refresh
-  </button>
-
-  <button onclick="logout()"
-    class="px-4 py-2 bg-red-600 text-white rounded-lg shadow">
-    🚪 Logout
-  </button>
-</div>
-
-<div id="grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
-
-<!-- Preview Modal -->
-<div id="modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
-  <img id="modalImg" class="max-h-[90vh] rounded-lg shadow-xl hidden">
-  <video id="modalVideo" class="max-h-[90vh] rounded-lg shadow-xl hidden" controls></video>
-</div>
 
 <script>
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
-const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
-const storedEventId = localStorage.getItem("adminEventId");
-const email = localStorage.getItem("adminEmail");
-const password = localStorage.getItem("adminPassword");
+const grid = document.getElementById("grid");
+const info = document.getElementById("info");
 
-if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
-  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
+if (!eventId) {
+  location.href = "/event-admin-login.html";
 }
 
-document.getElementById("info").textContent =
-  "Loading gallery for event ID: " + eventId + "...";
+info.textContent = `Loading uploads for event ${eventId}…`;
+
+document.getElementById("refreshBtn").addEventListener("click", loadFiles);
+document.getElementById("logoutBtn").addEventListener("click", logout);
+document.getElementById("closeModal").addEventListener("click", closeModal);
+document.getElementById("modal").addEventListener("click", (e) => {
+  if (e.target.id === "modal") closeModal();
+});
 
 async function loadFiles() {
-  const grid = document.getElementById("grid");
-  const info = document.getElementById("info");
-
-  grid.innerHTML = `
-    <div class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
-      Loading uploads...
-    </div>
-  `;
-  grid.innerHTML = "Loading...";
+  grid.innerHTML = loadingCard("Loading uploads…");
 
   try {
-    const res = await fetch(
-      `${API_BASE}/api/event-admin/list-files`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, email, password })
-      }
-    );
+    const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventId,
+        email: localStorage.getItem("adminEmail"),
+        password: localStorage.getItem("adminPassword")
+      })
+    });
 
     const data = await res.json();
 
     if (!res.ok) {
-      grid.innerHTML = `<p class="text-rose-400">${data.error || "Failed to load files."}</p>`;
-      grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
+      grid.innerHTML = errorCard(data.error || "Failed to load uploads.");
       return;
     }
 
-    const files = data.files || [];
+    const files = Array.isArray(data.files) ? data.files : [];
+
     if (files.length === 0) {
       info.textContent = "No uploads yet for this event.";
-      grid.innerHTML = `
-        <div class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
-          No uploads yet. Check back after your guests start uploading.
-        </div>
-      `;
-      grid.innerHTML = "";
+      grid.innerHTML = emptyCard();
       return;
     }
 
-    info.textContent = `Showing ${files.length} file(s) for event ${eventId}.`;
+    info.textContent = `Showing ${files.length} upload(s).`;
     grid.innerHTML = "";
 
-    files.forEach(file => {
-      const url =
-        `${API_BASE}/media?eventId=` +
-        encodeURIComponent(eventId) +
-        "&file=" +
-        encodeURIComponent(file.name);
-
-      const card = document.createElement("div");
-      card.className = "rounded-2xl overflow-hidden bg-slate-900/70 border border-white/10 img-card";
-      card.className = "rounded-lg overflow-hidden bg-gray-900 img-card";
-
-      const isVideo = file.name.toLowerCase().endsWith(".mp4");
-      const inner = isVideo
-        ? `
-          <video class="w-full h-44 object-cover bg-black" muted>
-            <source src="${url}" type="video/mp4">
-          </video>
-        `
-        : `<img src="${url}" class="w-full h-44 object-cover" alt="${file.name}">`;
-
-      card.innerHTML = `
-        ${inner}
-        <div class="p-3">
-          <p class="text-xs text-slate-400 uppercase tracking-wide">${isVideo ? "Video" : "Photo"}</p>
-          <p class="mt-1 text-sm font-medium text-white truncate">${file.name}</p>
-        </div>
-          <video controls class="w-full h-40 object-cover bg-black">
-            <source src="${url}" type="video/mp4">
-          </video>
-        `
-        : `<img src="${url}" class="w-full h-40 object-cover">`;
-
-      card.innerHTML = inner + `
-        <div class="p-2 text-xs text-gray-300 truncate">${file.name}</div>
-      `;
-
-      card.onclick = () => openModal(url, isVideo);
-      grid.appendChild(card);
-    });
-  } catch (error) {
-    console.error(error);
-    grid.innerHTML = `<p class="text-rose-400">Network error. Please try again.</p>`;
-    grid.innerHTML = `<p class="text-red-500">Network error. Please try again.</p>`;
+    for (const file of files) {
+      grid.appendChild(buildMediaCard(file));
+    }
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = errorCard("Network error. Please try again.");
   }
+}
+
+function buildMediaCard(file) {
+  const card = document.createElement("div");
+  card.className =
+    "media-card rounded-2xl overflow-hidden bg-white/5 border border-white/10";
+
+  const isVideo = file.name.toLowerCase().endsWith(".mp4");
+  const url =
+    `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
+
+  const preview = isVideo
+    ? document.createElement("video")
+    : document.createElement("img");
+
+  preview.src = url;
+  preview.className = "h-44 w-full object-cover bg-black";
+  if (isVideo) preview.muted = true;
+
+  const meta = document.createElement("div");
+  meta.className = "p-3";
+
+  const type = document.createElement("p");
+  type.className = "text-xs uppercase tracking-wide text-slate-400";
+  type.textContent = isVideo ? "Video" : "Photo";
+
+  const name = document.createElement("p");
+  name.className = "mt-1 text-sm font-medium truncate";
+  name.textContent = file.name;
+
+  meta.appendChild(type);
+  meta.appendChild(name);
+
+  card.appendChild(preview);
+  card.appendChild(meta);
+
+  card.addEventListener("click", () => openModal(url, isVideo));
+  return card;
 }
 
 function openModal(src, isVideo) {
   const modal = document.getElementById("modal");
-  const modalImg = document.getElementById("modalImg");
-  const modalVideo = document.getElementById("modalVideo");
+  const img = document.getElementById("modalImg");
+  const video = document.getElementById("modalVideo");
+
+  img.classList.add("hidden");
+  video.classList.add("hidden");
+  video.pause();
 
   if (isVideo) {
-    modalImg.classList.add("hidden");
-    modalVideo.classList.remove("hidden");
-    modalVideo.src = src;
+    video.src = src;
+    video.classList.remove("hidden");
   } else {
-    modalVideo.classList.add("hidden");
-    modalImg.classList.remove("hidden");
-    modalImg.src = src;
+    img.src = src;
+    img.classList.remove("hidden");
   }
+
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 }
 
 function closeModal() {
   const modal = document.getElementById("modal");
-  const modalVideo = document.getElementById("modalVideo");
+  const video = document.getElementById("modalVideo");
   modal.classList.add("hidden");
-  modalVideo.pause();
-  modal.onclick = () => {
-    modal.classList.add("hidden");
-    modalVideo.pause();
-  };
+  video.pause();
 }
 
 function logout() {
-  localStorage.removeItem("adminEventId");
   localStorage.removeItem("adminEmail");
   localStorage.removeItem("adminPassword");
-  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
+  location.href = `/event-admin-login.html?eventId=${encodeURIComponent(eventId)}`;
 }
 
-document.getElementById("modal").addEventListener("click", (event) => {
-  if (event.target.id === "modal" || event.target.id === "closeModal") {
-    closeModal();
-  }
-});
+function loadingCard(text) {
+  return `
+    <div class="col-span-full rounded-2xl bg-white/5 border border-white/10 p-6 text-sm text-slate-300">
+      ${text}
+    </div>
+  `;
+}
 
-document.getElementById("closeModal").addEventListener("click", closeModal);
+function emptyCard() {
+  return `
+    <div class="col-span-full rounded-2xl bg-white/5 border border-white/10 p-6 text-sm text-slate-300">
+      No uploads yet. Check back after guests start uploading.
+    </div>
+  `;
+}
+
+function errorCard(text) {
+  return `
+    <div class="col-span-full rounded-2xl bg-white/5 border border-rose-500/30 p-6 text-sm text-rose-400">
+      ${text}
+    </div>
+  `;
+}
 
 loadFiles();
 </script>
