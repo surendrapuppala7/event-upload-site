@@ -1,14 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Create Event</title>
+
+  <!-- Security headers (BEST set as real HTTP headers). This meta CSP is a strong baseline for static hosting. -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    object-src 'none';
+    upgrade-insecure-requests;
+    img-src 'self' data:;
+    connect-src 'self' https://event-upload-api.surendra-david-puppala.workers.dev;
+    style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+    script-src 'self' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net 'sha256-FsvFoO83ucvz7GO7njCQ1XOSdKJAIj1iFmJvofuf2kQ=';
+  " />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
+
+  <!-- Tailwind + QRCode -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
 
 <body class="bg-slate-950 text-white min-h-screen">
-  <div class="relative isolate overflow-hidden">
+  <div class="relative isolate overflow-hidden min-h-screen">
     <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.25),_transparent_60%)]"></div>
     <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.2),_transparent_60%)]"></div>
 
@@ -28,8 +47,9 @@
           </p>
           <h1 class="text-4xl font-semibold leading-tight">Create a new event and share your QR code instantly.</h1>
           <p class="text-slate-300">
-            Add your event name and owner email. We’ll create a secure upload link and QR code for guests to scan.
+            Add your event name and owner email. We’ll create an upload link and QR code for guests to scan.
           </p>
+
           <div class="grid gap-4 sm:grid-cols-2">
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p class="text-sm font-semibold">Step 1</p>
@@ -41,7 +61,7 @@
             </div>
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p class="text-sm font-semibold">Step 3</p>
-              <p class="text-sm text-slate-300 mt-2">Collect high-res photos in your admin gallery.</p>
+              <p class="text-sm text-slate-300 mt-2">Collect uploads in your admin gallery.</p>
             </div>
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p class="text-sm font-semibold">Step 4</p>
@@ -54,26 +74,26 @@
           <h2 class="text-2xl font-semibold">Event details</h2>
           <p class="mt-2 text-sm text-slate-500">Provide basic info to generate your QR invite.</p>
 
-          <div class="mt-6 space-y-4">
+          <form class="mt-6 space-y-4" autocomplete="on">
             <div>
               <label for="eventName" class="text-sm font-semibold text-slate-700">Event Name</label>
-              <input id="eventName" name="eventName" type="text" required
+              <input id="eventName" name="eventName" type="text" required maxlength="120"
                 class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                placeholder="e.g. John's Birthday Party">
+                placeholder="e.g. Alex's Birthday Party" />
             </div>
 
             <div>
               <label for="ownerEmail" class="text-sm font-semibold text-slate-700">Owner Email</label>
-              <input id="ownerEmail" name="ownerEmail" type="email" required
+              <input id="ownerEmail" name="ownerEmail" type="email" required maxlength="320" inputmode="email"
                 class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-                placeholder="your@email.com">
+                placeholder="alex@email.com" />
             </div>
 
-            <button id="createEventButton" onclick="generate()"
-              class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
+            <button id="createEventButton" type="button"
+              class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition disabled:opacity-60 disabled:cursor-not-allowed">
               ➕ Create Event
             </button>
-          </div>
+          </form>
 
           <p id="status" class="mt-4 text-center text-sm font-medium text-slate-600"></p>
 
@@ -81,127 +101,166 @@
             <h3 class="text-lg font-semibold text-slate-900" id="eventTitle"></h3>
 
             <p class="text-xs uppercase tracking-wide text-slate-500 mt-3">Event Link</p>
-            <p id="eventLink" class="mt-2 break-words text-sm font-medium text-indigo-600"></p>
+            <a id="eventLink" class="mt-2 block break-words text-sm font-medium text-indigo-600 underline" href="#" rel="noopener noreferrer"></a>
 
             <div class="mt-4 flex justify-center">
-              <canvas id="qrCanvas"></canvas>
+              <canvas id="qrCanvas" aria-label="QR code for event link"></canvas>
             </div>
           </div>
         </section>
       </div>
     </main>
+
+    <footer class="border-t border-white/10 bg-slate-950/70">
+      <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-slate-400 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p>Built with ❤️ using Cloudflare Workers, R2, and D1.</p>
+        <div class="flex gap-4">
+          <a href="index.html" class="hover:text-white">Home</a>
+          <a href="manage-events.html" class="hover:text-white">Manage Events</a>
+          <a href="super-admin-login.html" class="hover:text-white">Admin</a>
+        </div>
+      </div>
+    </footer>
   </div>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center">
 
-  <!-- HEADER -->
-  <header class="w-full bg-white shadow py-4 mb-8">
-    <h1 class="text-2xl font-bold text-center">🎉 Create New Event</h1>
-  </header>
-
-  <!-- MAIN CARD -->
-  <main class="w-full max-w-lg bg-white rounded-2xl shadow-lg p-6">
-
-    <p class="text-gray-600 mb-6 text-center">
-      Enter your event details to generate a QR code for guests.
-    </p>
-
-    <!-- FORM -->
-    <div class="space-y-4">
-
-      <!-- EVENT NAME -->
-      <div>
-        <label for="eventName" class="font-semibold text-gray-700">Event Name</label>
-        <input id="eventName" name="eventName" type="text" required
-          class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring focus:ring-indigo-300"
-          placeholder="e.g. John's Birthday Party">
-      </div>
-
-      <!-- OWNER EMAIL -->
-      <div>
-        <label for="ownerEmail" class="font-semibold text-gray-700">Owner Email</label>
-        <input id="ownerEmail" name="ownerEmail" type="email" required
-          class="w-full mt-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring focus:ring-indigo-300"
-          placeholder="your@email.com">
-      </div>
-
-      <!-- BUTTON -->
-      <button id="createEventButton" onclick="generate()"
-        class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold shadow hover:bg-indigo-700 transition">
-        ➕ Create Event
-      </button>
-
-    </div>
-
-    <p id="status" class="mt-4 text-center text-gray-700"></p>
-
-    <!-- QR OUTPUT -->
-    <div id="qrSection" class="hidden mt-8 p-6 border rounded-2xl bg-gray-50 text-center">
-
-      <h3 class="text-xl font-semibold mb-2" id="eventTitle"></h3>
-
-      <p class="text-sm text-gray-500">Event Link</p>
-      <p id="eventLink" class="break-words text-indigo-600 font-medium mb-4"></p>
-
-      <canvas id="qrCanvas" class="mx-auto"></canvas>
-    </div>
-
-  </main>
-
-<script>
+  <script>
 const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
+function clampEmail(email) {
+  return email.trim().slice(0, 320);
+}
+
+function clampName(name) {
+  return name.trim().slice(0, 120);
+}
+
+function isValidEmail(email) {
+  // pragmatic email check (not RFC-perfect)
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function setStatus(el, msg, kind = "info") {
+  el.textContent = msg;
+  el.className = "mt-4 text-center text-sm font-medium " + (
+    kind === "ok" ? "text-emerald-700" :
+    kind === "err" ? "text-rose-700" :
+    "text-slate-600"
+  );
+}
+
+function getCooldownMs() {
+  // Client-side throttle (not a security control)
+  return 15_000; // 15s between attempts
+}
+
+function canAttemptCreate() {
+  const key = "createEventLastAttempt";
+  const last = Number(localStorage.getItem(key) || "0");
+  const now = Date.now();
+  const wait = getCooldownMs() - (now - last);
+  if (wait > 0) return { ok: false, wait };
+  localStorage.setItem(key, String(now));
+  return { ok: true, wait: 0 };
+}
+
 async function generate() {
-  const name = document.getElementById("eventName").value.trim();
-  const owner = document.getElementById("ownerEmail").value.trim();
-  const status = document.getElementById("status");
+  const nameEl = document.getElementById("eventName");
+  const emailEl = document.getElementById("ownerEmail");
+  const statusEl = document.getElementById("status");
   const qrSection = document.getElementById("qrSection");
   const button = document.getElementById("createEventButton");
 
+  const name = clampName(nameEl.value);
+  const owner = clampEmail(emailEl.value);
+
   if (!name || !owner) {
-    status.textContent = "⚠️ Please enter both event name and owner email.";
+    setStatus(statusEl, "⚠️ Please enter both event name and owner email.", "err");
+    return;
+  }
+  if (!isValidEmail(owner)) {
+    setStatus(statusEl, "⚠️ Please enter a valid email address.", "err");
     return;
   }
 
-  status.textContent = "⏳ Creating event...";
+  const throttle = canAttemptCreate();
+  if (!throttle.ok) {
+    const secs = Math.ceil(throttle.wait / 1000);
+    setStatus(statusEl, `⏱️ Please wait ${secs}s before trying again.`, "err");
+    return;
+  }
+
+  setStatus(statusEl, "⏳ Creating event...", "info");
   button.disabled = true;
 
   try {
-    // Call Worker API
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12_000);
+
     const res = await fetch(`${API_BASE}/api/create-event`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, owner })
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ name, owner }),
+      signal: controller.signal
     });
 
+    clearTimeout(timeout);
+
     if (!res.ok) {
-      status.textContent = "❌ Error creating event.";
+      // If the API implements rate limiting, it should return 429 here.
+      if (res.status === 429) {
+        setStatus(statusEl, "🚦 Too many requests. Please slow down and try again shortly.", "err");
+      } else {
+        setStatus(statusEl, "❌ Error creating event.", "err");
+      }
       return;
     }
 
     const data = await res.json();
     const eventId = data.eventId;
 
-    status.textContent = "✅ Event created!";
+    if (!eventId) {
+      setStatus(statusEl, "❌ Server response missing eventId.", "err");
+      return;
+    }
+
+    setStatus(statusEl, "✅ Event created! Share the link or let guests scan the QR.", "ok");
     qrSection.classList.remove("hidden");
 
-    // Final guest upload page
-    const eventUrl = location.origin + "/guest-upload.html?eventId=" + eventId;
+    const eventUrl = `${location.origin}/guest-upload.html?eventId=${encodeURIComponent(eventId)}`;
 
     document.getElementById("eventTitle").textContent = name;
-    document.getElementById("eventLink").textContent = eventUrl;
+    const linkEl = document.getElementById("eventLink");
+    linkEl.textContent = eventUrl;
+    linkEl.setAttribute("href", eventUrl);
 
-    // Generate QR Code
-    QRCode.toCanvas(document.getElementById("qrCanvas"), eventUrl, (err) => {
+    const canvas = document.getElementById("qrCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    QRCode.toCanvas(canvas, eventUrl, { margin: 1, width: 220 }, (err) => {
       if (err) console.error(err);
     });
   } catch (error) {
     console.error(error);
-    status.textContent = "❌ Network error. Please try again.";
+    const msg = (error && error.name === "AbortError")
+      ? "❌ Request timed out. Please try again."
+      : "❌ Network error. Please try again.";
+    setStatus(statusEl, msg, "err");
   } finally {
     button.disabled = false;
   }
 }
-</script>
 
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("createEventButton");
+  btn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    generate();
+  });
+});
+  </script>
 </body>
 </html>
