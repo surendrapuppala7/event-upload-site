@@ -114,6 +114,7 @@ async function createAdmin() {
     if (!res.ok) {
       status.textContent = data.error || "Error creating admin.";
       status.className = "mt-4 text-sm text-rose-500";
+      status.className = "mt-4 text-sm text-red-400";
       return;
     }
 
@@ -123,6 +124,11 @@ async function createAdmin() {
     console.error(error);
     status.textContent = "Network error. Please try again.";
     status.className = "mt-4 text-sm text-rose-500";
+    status.className = "mt-4 text-sm text-green-400";
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Network error. Please try again.";
+    status.className = "mt-4 text-sm text-red-400";
   }
 }
 </script>

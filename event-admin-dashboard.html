@@ -56,6 +56,20 @@ async function loadFiles() {
     </div>
   `;
 
+const storedEventId = localStorage.getItem("adminEventId");
+const email = localStorage.getItem("adminEmail");
+const password = localStorage.getItem("adminPassword");
+
+if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
+}
+
+document.getElementById("eventTitle").textContent = `Event Admin: ${eventId}`;
+
+async function loadFiles() {
+  const grid = document.getElementById("filesGrid");
+  grid.innerHTML = "Loading...";
+
   try {
     const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
       method: "POST",
@@ -66,6 +80,7 @@ async function loadFiles() {
 
     if (!res.ok) {
       grid.innerHTML = `<p class="text-rose-400">${data.error || "Failed to load files."}</p>`;
+      grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
       return;
     }
 
@@ -87,12 +102,25 @@ async function loadFiles() {
             <p class="text-sm font-medium text-white truncate">${file.name}</p>
             <a href="${url}" download class="mt-2 inline-flex text-sm text-indigo-300 hover:text-indigo-200">Download file</a>
           </div>
+
+      let preview = "";
+      if (ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp")) {
+        preview = `<img src="${url}" class="rounded-lg shadow">`;
+      } else {
+        preview = `<video src="${url}" class="rounded-lg shadow" controls></video>`;
+      }
+
+      grid.innerHTML += `
+        <div class="p-2 border rounded-xl">
+          ${preview}
+          <a href="${url}" download class="block mt-2 text-indigo-600 underline">Download</a>
         </div>
       `;
     });
   } catch (error) {
     console.error(error);
     grid.innerHTML = `<p class="text-rose-400">Network error. Please try again.</p>`;
+    grid.innerHTML = `<p class="text-red-500">Network error. Please try again.</p>`;
   }
 }
 
