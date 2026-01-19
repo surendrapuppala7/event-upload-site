@@ -1,74 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-slate-950 text-white">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Event Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen p-6">
+<body class="min-h-screen">
+  <div class="relative isolate overflow-hidden min-h-screen">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_60%)]"></div>
+    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.16),_transparent_60%)]"></div>
 
-<h1 id="eventTitle" class="text-3xl font-bold text-center mb-6"></h1>
+    <header class="max-w-6xl mx-auto px-6 py-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-300">Event Admin</p>
+        <h1 id="eventTitle" class="text-3xl font-semibold"></h1>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="downloadZip()"
+          class="rounded-xl bg-emerald-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
+          Download ZIP
+        </button>
+        <button onclick="logout()"
+          class="rounded-xl bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500">
+          Logout
+        </button>
+      </div>
+    </header>
 
-<div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6">
-
-  <div class="flex justify-between mb-4">
-    <button onclick="downloadZip()"
-      class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-      Download All as ZIP
-    </button>
-
-    <button onclick="logout()"
-      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-      Logout
-    </button>
+    <main class="max-w-6xl mx-auto px-6 pb-16">
+      <div id="filesGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </main>
   </div>
-
-  <div id="filesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
-
-</div>
 
 <script>
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
-document.getElementById("eventTitle").textContent = `Event Admin: ${eventId}`;
+const storedEventId = localStorage.getItem("adminEventId");
+const email = localStorage.getItem("adminEmail");
+const password = localStorage.getItem("adminPassword");
+
+if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
+}
+
+document.getElementById("eventTitle").textContent = `Event ${eventId}`;
 
 async function loadFiles() {
-  const res = await fetch(`https://event-upload-api.surendra-david-puppala.workers.dev/list?eventId=${eventId}`);
-  const data = await res.json();
-
   const grid = document.getElementById("filesGrid");
-  grid.innerHTML = "";
+  grid.innerHTML = `
+    <div class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
+      Loading uploads...
+    </div>
+  `;
 
-  data.files.forEach(file => {
-    const url = `https://event-upload-api.surendra-david-puppala.workers.dev/media?eventId=${eventId}&file=${encodeURIComponent(file.name.replace(eventId + "/", ""))}`;
+  try {
+    const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventId, email, password })
+    });
+    const data = await res.json();
 
-    const ext = file.name.toLowerCase();
-
-    let preview = "";
-    if (ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp")) {
-      preview = `<img src="${url}" class="rounded-lg shadow">`;
-    } else {
-      preview = `<video src="${url}" class="rounded-lg shadow" controls></video>`;
+    if (!res.ok) {
+      grid.innerHTML = `<p class="text-rose-400">${data.error || "Failed to load files."}</p>`;
+      return;
     }
 
-    grid.innerHTML += `
-      <div class="p-2 border rounded-xl">
-        ${preview}
-        <a href="${url}" download class="block mt-2 text-indigo-600 underline">Download</a>
-      </div>
-    `;
-  });
+    grid.innerHTML = "";
+
+    data.files.forEach(file => {
+      const url = `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
+      const ext = file.name.toLowerCase();
+      const isImage = ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp");
+
+      const preview = isImage
+        ? `<img src="${url}" class="h-48 w-full object-cover" alt="${file.name}">`
+        : `<video src="${url}" class="h-48 w-full object-cover" controls></video>`;
+
+      grid.innerHTML += `
+        <div class="rounded-2xl overflow-hidden border border-white/10 bg-slate-900/70">
+          ${preview}
+          <div class="p-4">
+            <p class="text-sm font-medium text-white truncate">${file.name}</p>
+            <a href="${url}" download class="mt-2 inline-flex text-sm text-indigo-300 hover:text-indigo-200">Download file</a>
+          </div>
+        </div>
+      `;
+    });
+  } catch (error) {
+    console.error(error);
+    grid.innerHTML = `<p class="text-rose-400">Network error. Please try again.</p>`;
+  }
 }
 
 function downloadZip() {
-  window.location = `https://event-upload-api.surendra-david-puppala.workers.dev/api/zip?eventId=${eventId}`;
+  window.location = `${API_BASE}/api/zip?eventId=${eventId}`;
 }
 
 function logout() {
-  localStorage.removeItem("eventAdminAuth");
-  location.href = "/event-admin-login.html";
+  localStorage.removeItem("adminEventId");
+  localStorage.removeItem("adminEmail");
+  localStorage.removeItem("adminPassword");
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
 }
 
 loadFiles();
