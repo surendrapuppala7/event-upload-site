@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark:bg-black dark:text-white">
+<html lang="en" class="bg-slate-950 text-white">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Event Gallery (Admin)</title>
@@ -11,12 +11,50 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .img-card:hover {
-      transform: scale(1.03);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.45);
     }
   </style>
 </head>
 
+<body class="min-h-screen">
+  <div class="relative isolate overflow-hidden min-h-screen">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.25),_transparent_60%)]"></div>
+    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.18),_transparent_60%)]"></div>
+
+    <header class="max-w-6xl mx-auto px-6 py-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm uppercase tracking-wide text-slate-300">Event Admin Gallery</p>
+        <h1 class="text-3xl font-semibold">Your event uploads</h1>
+        <p id="info" class="text-sm text-slate-300 mt-2"></p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button onclick="loadFiles()"
+          class="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20">
+          🔄 Refresh
+        </button>
+        <button onclick="logout()"
+          class="inline-flex items-center gap-2 rounded-xl bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500">
+          🚪 Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-16">
+      <div id="grid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+    </main>
+  </div>
+
+  <div id="modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center p-4">
+    <div class="max-w-4xl w-full bg-slate-900/90 rounded-2xl border border-white/10 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm text-slate-300">Preview</p>
+        <button id="closeModal" class="text-sm text-slate-300 hover:text-white">Close</button>
+      </div>
+      <img id="modalImg" class="max-h-[75vh] w-full rounded-lg hidden" alt="Preview image">
+      <video id="modalVideo" class="max-h-[75vh] w-full rounded-lg hidden" controls></video>
+    </div>
+  </div>
 <body class="min-h-screen p-6">
 
 <h1 class="text-3xl font-bold mb-2">🖼 Event Gallery (Admin)</h1>
@@ -52,7 +90,6 @@ const email = localStorage.getItem("adminEmail");
 const password = localStorage.getItem("adminPassword");
 
 if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
-  // force login
   location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
 }
 
@@ -63,6 +100,11 @@ async function loadFiles() {
   const grid = document.getElementById("grid");
   const info = document.getElementById("info");
 
+  grid.innerHTML = `
+    <div class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
+      Loading uploads...
+    </div>
+  `;
   grid.innerHTML = "Loading...";
 
   try {
@@ -78,6 +120,7 @@ async function loadFiles() {
     const data = await res.json();
 
     if (!res.ok) {
+      grid.innerHTML = `<p class="text-rose-400">${data.error || "Failed to load files."}</p>`;
       grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
       return;
     }
@@ -85,6 +128,11 @@ async function loadFiles() {
     const files = data.files || [];
     if (files.length === 0) {
       info.textContent = "No uploads yet for this event.";
+      grid.innerHTML = `
+        <div class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
+          No uploads yet. Check back after your guests start uploading.
+        </div>
+      `;
       grid.innerHTML = "";
       return;
     }
@@ -100,11 +148,24 @@ async function loadFiles() {
         encodeURIComponent(file.name);
 
       const card = document.createElement("div");
+      card.className = "rounded-2xl overflow-hidden bg-slate-900/70 border border-white/10 img-card";
       card.className = "rounded-lg overflow-hidden bg-gray-900 img-card";
 
       const isVideo = file.name.toLowerCase().endsWith(".mp4");
       const inner = isVideo
         ? `
+          <video class="w-full h-44 object-cover bg-black" muted>
+            <source src="${url}" type="video/mp4">
+          </video>
+        `
+        : `<img src="${url}" class="w-full h-44 object-cover" alt="${file.name}">`;
+
+      card.innerHTML = `
+        ${inner}
+        <div class="p-3">
+          <p class="text-xs text-slate-400 uppercase tracking-wide">${isVideo ? "Video" : "Photo"}</p>
+          <p class="mt-1 text-sm font-medium text-white truncate">${file.name}</p>
+        </div>
           <video controls class="w-full h-40 object-cover bg-black">
             <source src="${url}" type="video/mp4">
           </video>
@@ -120,6 +181,7 @@ async function loadFiles() {
     });
   } catch (error) {
     console.error(error);
+    grid.innerHTML = `<p class="text-rose-400">Network error. Please try again.</p>`;
     grid.innerHTML = `<p class="text-red-500">Network error. Please try again.</p>`;
   }
 }
@@ -140,7 +202,13 @@ function openModal(src, isVideo) {
   }
   modal.classList.remove("hidden");
   modal.classList.add("flex");
+}
 
+function closeModal() {
+  const modal = document.getElementById("modal");
+  const modalVideo = document.getElementById("modalVideo");
+  modal.classList.add("hidden");
+  modalVideo.pause();
   modal.onclick = () => {
     modal.classList.add("hidden");
     modalVideo.pause();
@@ -153,6 +221,14 @@ function logout() {
   localStorage.removeItem("adminPassword");
   location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
 }
+
+document.getElementById("modal").addEventListener("click", (event) => {
+  if (event.target.id === "modal" || event.target.id === "closeModal") {
+    closeModal();
+  }
+});
+
+document.getElementById("closeModal").addEventListener("click", closeModal);
 
 loadFiles();
 </script>

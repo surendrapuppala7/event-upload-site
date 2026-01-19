@@ -7,6 +7,90 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
 
+<body class="bg-slate-950 text-white min-h-screen">
+  <div class="relative isolate overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.25),_transparent_60%)]"></div>
+    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.2),_transparent_60%)]"></div>
+
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">📸</span>
+        <span class="text-lg font-semibold">Event Upload Platform</span>
+      </div>
+      <a href="index.html" class="text-sm text-slate-300 hover:text-white">Back to Home</a>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-16 pt-6">
+      <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] items-start">
+        <section class="space-y-6">
+          <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
+            ⚡ Generate a guest QR link in under a minute
+          </p>
+          <h1 class="text-4xl font-semibold leading-tight">Create a new event and share your QR code instantly.</h1>
+          <p class="text-slate-300">
+            Add your event name and owner email. We’ll create a secure upload link and QR code for guests to scan.
+          </p>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Step 1</p>
+              <p class="text-sm text-slate-300 mt-2">Create the event and generate a QR link.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Step 2</p>
+              <p class="text-sm text-slate-300 mt-2">Share the QR code with guests at the venue.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Step 3</p>
+              <p class="text-sm text-slate-300 mt-2">Collect high-res photos in your admin gallery.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p class="text-sm font-semibold">Step 4</p>
+              <p class="text-sm text-slate-300 mt-2">Download and share the full album anytime.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
+          <h2 class="text-2xl font-semibold">Event details</h2>
+          <p class="mt-2 text-sm text-slate-500">Provide basic info to generate your QR invite.</p>
+
+          <div class="mt-6 space-y-4">
+            <div>
+              <label for="eventName" class="text-sm font-semibold text-slate-700">Event Name</label>
+              <input id="eventName" name="eventName" type="text" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                placeholder="e.g. John's Birthday Party">
+            </div>
+
+            <div>
+              <label for="ownerEmail" class="text-sm font-semibold text-slate-700">Owner Email</label>
+              <input id="ownerEmail" name="ownerEmail" type="email" required
+                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                placeholder="your@email.com">
+            </div>
+
+            <button id="createEventButton" onclick="generate()"
+              class="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold shadow-lg hover:bg-indigo-500 transition">
+              ➕ Create Event
+            </button>
+          </div>
+
+          <p id="status" class="mt-4 text-center text-sm font-medium text-slate-600"></p>
+
+          <div id="qrSection" class="hidden mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
+            <h3 class="text-lg font-semibold text-slate-900" id="eventTitle"></h3>
+
+            <p class="text-xs uppercase tracking-wide text-slate-500 mt-3">Event Link</p>
+            <p id="eventLink" class="mt-2 break-words text-sm font-medium text-indigo-600"></p>
+
+            <div class="mt-4 flex justify-center">
+              <canvas id="qrCanvas"></canvas>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center">
 
   <!-- HEADER -->
