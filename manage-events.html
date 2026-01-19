@@ -1,128 +1,166 @@
 <!DOCTYPE html>
-<html lang="en" class="dark:bg-black dark:text-white">
+<html lang="en" class="bg-slate-950 text-white">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Manage Events</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    .glass {
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      background: rgba(255,255,255,0.6);
-    }
-    .dark .glass {
-      background: rgba(30,30,30,0.5);
-    }
-  </style>
 </head>
 
-<body class="min-h-screen p-6">
+<body class="min-h-screen">
+  <div class="relative isolate overflow-hidden min-h-screen">
+    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.25),_transparent_55%)]"></div>
 
-  <header class="w-full mb-8 text-center">
-    <h1 class="text-3xl font-bold">📋 Manage My Events</h1>
-    <p class="text-gray-600 dark:text-gray-300 mt-2">
-      Enter your email to view events you've created.
-    </p>
-  </header>
+    <!-- HEADER -->
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">📋</span>
+        <span class="text-lg font-semibold">Manage My Events</span>
+      </div>
+      <a href="index.html" class="text-sm text-slate-300 hover:text-white">
+        Back to Home
+      </a>
+    </header>
 
-  <div class="max-w-lg mx-auto mb-8">
-    <label for="ownerEmail" class="sr-only">Owner email</label>
-    <input id="ownerEmail" type="email" required
-      class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700
-             bg-white dark:bg-gray-900 focus:ring focus:ring-indigo-300 dark:focus:ring-indigo-800"
-      placeholder="Enter your email (same as event creation)">
-    
-    <button onclick="loadEvents()"
-      class="mt-4 w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow transition">
-      🔍 Load Events
-    </button>
+    <!-- MAIN -->
+    <main class="max-w-6xl mx-auto px-6 pb-16 pt-6">
+
+      <!-- EMAIL INPUT CARD -->
+      <section class="max-w-xl mx-auto bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl">
+        <h2 class="text-xl font-semibold">View your events</h2>
+        <p class="mt-1 text-sm text-slate-300">
+          Enter the email you used when creating events.
+        </p>
+
+        <div class="mt-4 space-y-3">
+          <label for="ownerEmail" class="text-sm font-semibold text-slate-200">
+            Owner email
+          </label>
+          <input id="ownerEmail" type="email" required
+            placeholder="you@email.com"
+            class="w-full rounded-xl border border-white/10 bg-slate-900
+                   px-4 py-3 text-white shadow-sm
+                   focus:border-indigo-500 focus:outline-none
+                   focus:ring-2 focus:ring-indigo-500/30" />
+
+          <button id="loadButton"
+            class="w-full rounded-xl bg-indigo-600 py-3
+                   text-white font-semibold shadow
+                   hover:bg-indigo-500 transition
+                   disabled:opacity-60 disabled:cursor-not-allowed">
+            Load events
+          </button>
+        </div>
+
+        <p id="status"
+           class="mt-4 text-center text-sm text-slate-300"
+           aria-live="polite"></p>
+      </section>
+
+      <!-- EVENTS GRID -->
+      <section class="mt-10">
+        <div id="eventsGrid"
+             class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+      </section>
+
+    </main>
   </div>
 
-  <p id="status" class="text-center text-gray-600 dark:text-gray-400 mb-6"></p>
-
-  <div id="eventsGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
-
 <script>
+const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+
+document.getElementById("loadButton").addEventListener("click", loadEvents);
+
 async function loadEvents() {
-  const email = document.getElementById("ownerEmail").value.trim();
+  const emailInput = document.getElementById("ownerEmail");
   const status = document.getElementById("status");
   const grid = document.getElementById("eventsGrid");
-  const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+  const button = document.getElementById("loadButton");
 
+  const email = emailInput.value.trim();
   if (!email) {
-    status.textContent = "⚠️ Please enter your email.";
+    status.textContent = "Please enter your email.";
     return;
   }
 
-  status.textContent = "⏳ Loading events...";
+  status.textContent = "Loading events…";
   grid.innerHTML = "";
+  button.disabled = true;
 
   try {
     const res = await fetch(
-      `${API_BASE}/api/list-events?owner=` + encodeURIComponent(email)
+      `${API_BASE}/api/list-events?owner=${encodeURIComponent(email)}`
     );
 
     if (!res.ok) {
-      status.textContent = "❌ Error loading events.";
+      status.textContent = "Error loading events.";
       return;
     }
 
     const data = await res.json();
-    const events = data.events || [];
+    const events = Array.isArray(data.events) ? data.events : [];
 
     if (events.length === 0) {
       status.textContent = "No events found for this email.";
       return;
     }
 
-  status.textContent = "";
-  grid.innerHTML = "";
+    status.textContent = "";
 
-  const gradients = [
-    "from-indigo-500/20 to-purple-500/20",
-    "from-rose-400/20 to-pink-500/20",
-    "from-blue-400/20 to-cyan-500/20",
-    "from-emerald-400/20 to-green-500/20",
-    "from-orange-400/20 to-amber-500/20"
-  ];
-
-    events.forEach(ev => {
-      const uploadUrl = location.origin + "/guest-upload.html?eventId=" + ev.id;
-    const adminLoginUrl = location.origin + "/event-admin-login.html?eventId=" + ev.id;
-
-    const accent = gradients[Math.floor(Math.random() * gradients.length)];
-
-    const card = document.createElement("div");
-    card.className =
-      "glass rounded-2xl p-6 shadow-lg border border-white/30 dark:border-white/10 " +
-      "bg-gradient-to-br " + accent +
-      " transition hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.01]";
-
-    card.innerHTML = `
-      <h2 class="text-xl font-bold mb-1">${ev.name}</h2>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Event ID: ${ev.id}</p>
-      <p class="text-xs text-gray-500 dark:text-gray-500 mb-4">Created: ${ev.created_at}</p>
-
-      <div class="flex flex-col gap-3 mt-4">
-        <a href="${uploadUrl}"
-          class="text-center bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg shadow transition">
-          📸 Open Guest Upload Page
-        </a>
-
-        <a href="${adminLoginUrl}"
-          class="text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg shadow transition">
-          🛠 Event Admin Login
-        </a>
-      </div>
-    `;
-
-      grid.appendChild(card);
-    });
-  } catch (error) {
-    console.error(error);
-    status.textContent = "❌ Network error. Please try again.";
+    for (const ev of events) {
+      grid.appendChild(buildEventCard(ev));
+    }
+  } catch (err) {
+    console.error(err);
+    status.textContent = "Network error. Please try again.";
+  } finally {
+    button.disabled = false;
   }
+}
+
+function buildEventCard(ev) {
+  const card = document.createElement("div");
+  card.className =
+    "rounded-2xl bg-white/5 border border-white/10 p-6 shadow-xl " +
+    "transition hover:shadow-2xl hover:-translate-y-1";
+
+  const title = document.createElement("h3");
+  title.className = "text-xl font-semibold";
+  title.textContent = ev.name || "Untitled Event";
+
+  const meta = document.createElement("p");
+  meta.className = "mt-1 text-sm text-slate-300";
+  meta.textContent = `Event ID: ${ev.id}`;
+
+  const created = document.createElement("p");
+  created.className = "mt-1 text-xs text-slate-400";
+  created.textContent = `Created: ${ev.created_at}`;
+
+  const actions = document.createElement("div");
+  actions.className = "mt-5 flex flex-col gap-3";
+
+  const uploadLink = document.createElement("a");
+  uploadLink.href = `/guest-upload.html?eventId=${encodeURIComponent(ev.id)}`;
+  uploadLink.className =
+    "text-center rounded-lg bg-emerald-600 py-2 text-white " +
+    "font-semibold hover:bg-emerald-500 transition";
+  uploadLink.textContent = "Open guest upload";
+
+  const adminLink = document.createElement("a");
+  adminLink.href = `/event-admin-login.html?eventId=${encodeURIComponent(ev.id)}`;
+  adminLink.className =
+    "text-center rounded-lg bg-indigo-600 py-2 text-white " +
+    "font-semibold hover:bg-indigo-500 transition";
+  adminLink.textContent = "Admin login";
+
+  actions.appendChild(uploadLink);
+  actions.appendChild(adminLink);
+
+  card.appendChild(title);
+  card.appendChild(meta);
+  card.appendChild(created);
+  card.appendChild(actions);
+
+  return card;
 }
 </script>
 
