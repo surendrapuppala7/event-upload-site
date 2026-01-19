@@ -1,78 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-slate-950 text-white">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Event Admin Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen p-6">
-
-<h1 id="eventTitle" class="text-3xl font-bold text-center mb-6"></h1>
-
-<div class="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-6">
-
-  <div class="flex justify-between mb-4">
-    <button onclick="downloadZip()"
-      class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-      Download All as ZIP
-    </button>
-
-    <button onclick="logout()"
-      class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-      Logout
-    </button>
+<body class="min-h-screen flex items-center justify-center px-6">
+  <div class="max-w-xl text-center space-y-4">
+    <h1 class="text-3xl font-semibold">Event admin dashboard moved</h1>
+    <p class="text-slate-300">
+      The admin dashboard now lives in the event gallery. You will be redirected shortly.
+    </p>
+    <p class="text-sm text-slate-400">
+      If the redirect does not happen automatically, use the button below.
+    </p>
+    <a id="galleryLink"
+      class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white shadow hover:bg-indigo-500"
+      href="gallery.html">
+      Go to Event Gallery
+    </a>
   </div>
-
-  <div id="filesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
-
-</div>
 
 <script>
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
+const target = eventId
+  ? "/gallery.html?eventId=" + encodeURIComponent(eventId)
+  : "/gallery.html";
 
-document.getElementById("eventTitle").textContent = `Event Admin: ${eventId}`;
+const link = document.getElementById("galleryLink");
+link.href = target;
 
-async function loadFiles() {
-  const res = await fetch(`https://event-upload-api.surendra-david-puppala.workers.dev/list?eventId=${eventId}`);
-  const data = await res.json();
-
-  const grid = document.getElementById("filesGrid");
-  grid.innerHTML = "";
-
-  data.files.forEach(file => {
-    const url = `https://event-upload-api.surendra-david-puppala.workers.dev/media?eventId=${eventId}&file=${encodeURIComponent(file.name.replace(eventId + "/", ""))}`;
-
-    const ext = file.name.toLowerCase();
-
-    let preview = "";
-    if (ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp")) {
-      preview = `<img src="${url}" class="rounded-lg shadow">`;
-    } else {
-      preview = `<video src="${url}" class="rounded-lg shadow" controls></video>`;
-    }
-
-    grid.innerHTML += `
-      <div class="p-2 border rounded-xl">
-        ${preview}
-        <a href="${url}" download class="block mt-2 text-indigo-600 underline">Download</a>
-      </div>
-    `;
-  });
-}
-
-function downloadZip() {
-  window.location = `https://event-upload-api.surendra-david-puppala.workers.dev/api/zip?eventId=${eventId}`;
-}
-
-function logout() {
-  localStorage.removeItem("eventAdminAuth");
-  location.href = "/event-admin-login.html";
-}
-
-loadFiles();
+setTimeout(() => {
+  location.href = target;
+}, 1200);
 </script>
-
 </body>
 </html>
