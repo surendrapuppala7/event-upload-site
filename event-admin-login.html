@@ -29,29 +29,29 @@
         <!-- LEFT: CONTEXT -->
         <section class="space-y-6">
           <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
-            Secure access for event administrators
+            Secure admin authentication
           </p>
 
           <h1 class="text-4xl font-semibold leading-tight">
-            Manage and review event uploads securely.
+            Sign in securely to manage your event.
           </h1>
 
           <p class="text-slate-300">
-            Sign in using your event admin credentials to access the private gallery,
-            review uploads, and download media files.
+            Event administrators authenticate using Google.
+            No passwords are stored or handled by this platform.
           </p>
 
           <div class="grid gap-4 sm:grid-cols-2">
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p class="text-sm font-semibold">Private gallery</p>
+              <p class="text-sm font-semibold">Google-verified identity</p>
               <p class="text-sm text-slate-300 mt-2">
-                View and manage all guest uploads in one place.
+                Authentication handled by Google OAuth.
               </p>
             </div>
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p class="text-sm font-semibold">Controlled access</p>
+              <p class="text-sm font-semibold">Event-scoped access</p>
               <p class="text-sm text-slate-300 mt-2">
-                Admin-only access with secure authentication.
+                Access limited to events you’re authorized for.
               </p>
             </div>
           </div>
@@ -61,54 +61,41 @@
         <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
           <h2 class="text-2xl font-semibold">Admin sign in</h2>
           <p class="mt-2 text-sm text-slate-500">
-            Enter your event admin credentials.
+            Enter your Event ID, then continue with Google.
           </p>
 
-          <div class="mt-6 space-y-4">
+          <div class="mt-6 space-y-5">
             <div>
               <label for="eventId" class="text-sm font-semibold text-slate-700">
                 Event ID
               </label>
-              <input id="eventId" required
+              <input
+                id="eventId"
+                required
                 placeholder="e.g. EVT-AB1234"
                 class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3
                        text-slate-900 shadow-sm focus:border-indigo-500
                        focus:outline-none focus:ring-2 focus:ring-indigo-200" />
             </div>
 
-            <div>
-              <label for="email" class="text-sm font-semibold text-slate-700">
-                Email
-              </label>
-              <input id="email" type="email" required
-                placeholder="admin@email.com"
-                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3
-                       text-slate-900 shadow-sm focus:border-indigo-500
-                       focus:outline-none focus:ring-2 focus:ring-indigo-200" />
-            </div>
-
-            <div>
-              <label for="password" class="text-sm font-semibold text-slate-700">
-                Password
-              </label>
-              <input id="password" type="password" required
-                placeholder="Your password"
-                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3
-                       text-slate-900 shadow-sm focus:border-indigo-500
-                       focus:outline-none focus:ring-2 focus:ring-indigo-200" />
-            </div>
-
-            <button id="loginButton"
-              class="w-full rounded-xl bg-indigo-600 py-3 text-white
-                     font-semibold shadow-lg hover:bg-indigo-500 transition
-                     disabled:opacity-60 disabled:cursor-not-allowed">
-              Sign In
+            <button
+              id="googleLoginBtn"
+              class="w-full flex items-center justify-center gap-3
+                     rounded-xl border border-slate-300 bg-white py-3
+                     font-semibold shadow hover:bg-slate-50 transition">
+              <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.01 1.54 7.39 2.82l5.46-5.46C33.47 3.54 29.13 1.5 24 1.5 14.78 1.5 6.87 6.98 3.14 14.9l6.64 5.16C11.4 13.02 17.22 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.1 24.5c0-1.56-.14-3.06-.4-4.5H24v9.02h12.44c-.54 2.9-2.16 5.36-4.6 7.02l7.05 5.48C43.27 37.38 46.1 31.5 46.1 24.5z"/>
+                <path fill="#FBBC05" d="M9.78 28.06a14.7 14.7 0 0 1 0-8.12l-6.64-5.16A23.92 23.92 0 0 0 1.5 24c0 3.86.92 7.5 2.64 10.78l6.64-5.16z"/>
+                <path fill="#34A853" d="M24 46.5c6.13 0 11.28-2.03 15.04-5.52l-7.05-5.48c-1.96 1.32-4.48 2.1-7.99 2.1-6.78 0-12.6-3.52-14.22-8.56l-6.64 5.16C6.87 41.02 14.78 46.5 24 46.5z"/>
+              </svg>
+              Continue with Google
             </button>
-          </div>
 
-          <p id="status"
-             class="mt-4 text-center text-sm font-medium text-rose-600"
-             aria-live="polite"></p>
+            <p id="status"
+               class="text-center text-sm font-medium text-rose-600"
+               aria-live="polite"></p>
+          </div>
         </section>
       </div>
     </main>
@@ -123,50 +110,22 @@ if (eventIdParam) {
   input.readOnly = true;
 }
 
-document.getElementById("loginButton").addEventListener("click", login);
-
-async function login() {
-  const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
-
+document.getElementById("googleLoginBtn").addEventListener("click", () => {
   const eventId = document.getElementById("eventId").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
   const status = document.getElementById("status");
-  const button = document.getElementById("loginButton");
 
-  if (!eventId || !email || !password) {
-    status.textContent = "All fields are required.";
+  if (!eventId) {
+    status.textContent = "Event ID is required.";
     return;
   }
 
-  status.textContent = "Signing in...";
-  button.disabled = true;
+  const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
-  try {
-    const res = await fetch(`${API_BASE}/api/event-admin/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId, email, password })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      status.textContent = data.error || "Login failed.";
-      button.disabled = false;
-      return;
-    }
-
-    // TEMPORARY FLOW (sessions coming next)
-    // Do NOT store password client-side.
-    location.href = `/gallery.html?eventId=${encodeURIComponent(eventId)}`;
-  } catch (err) {
-    console.error(err);
-    status.textContent = "Network error. Please try again.";
-  } finally {
-    button.disabled = false;
-  }
-}
+  // Redirect to Worker OAuth start endpoint
+  window.location.href =
+    `${API_BASE}/api/oauth/google/start?eventId=` +
+    encodeURIComponent(eventId);
+});
 </script>
 
 </body>
