@@ -24,12 +24,8 @@
     <!-- HEADER -->
     <header class="max-w-6xl mx-auto px-6 py-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p class="text-xs uppercase tracking-wide text-slate-400">
-          Event admin
-        </p>
-        <h1 class="text-3xl font-semibold">
-          Event gallery
-        </h1>
+        <p class="text-xs uppercase tracking-wide text-slate-400">Event admin</p>
+        <h1 class="text-3xl font-semibold">Event gallery</h1>
         <p id="info" class="mt-2 text-sm text-slate-300"></p>
       </div>
 
@@ -103,12 +99,14 @@ async function loadFiles() {
     const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventId,
-        email: localStorage.getItem("adminEmail"),
-        password: localStorage.getItem("adminPassword")
-      })
+      credentials: "include", // 🔐 OAuth cookie
+      body: JSON.stringify({ eventId })
     });
+
+    if (res.status === 401) {
+      location.href = `/event-admin-login.html?eventId=${encodeURIComponent(eventId)}`;
+      return;
+    }
 
     const data = await res.json();
 
@@ -146,10 +144,7 @@ function buildMediaCard(file) {
   const url =
     `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
 
-  const preview = isVideo
-    ? document.createElement("video")
-    : document.createElement("img");
-
+  const preview = document.createElement(isVideo ? "video" : "img");
   preview.src = url;
   preview.className = "h-44 w-full object-cover bg-black";
   if (isVideo) preview.muted = true;
@@ -170,8 +165,8 @@ function buildMediaCard(file) {
 
   card.appendChild(preview);
   card.appendChild(meta);
-
   card.addEventListener("click", () => openModal(url, isVideo));
+
   return card;
 }
 
@@ -197,15 +192,16 @@ function openModal(src, isVideo) {
 }
 
 function closeModal() {
-  const modal = document.getElementById("modal");
-  const video = document.getElementById("modalVideo");
-  modal.classList.add("hidden");
-  video.pause();
+  document.getElementById("modal").classList.add("hidden");
+  document.getElementById("modalVideo").pause();
 }
 
-function logout() {
-  localStorage.removeItem("adminEmail");
-  localStorage.removeItem("adminPassword");
+async function logout() {
+  await fetch(`${API_BASE}/api/event-admin/logout`, {
+    method: "POST",
+    credentials: "include"
+  });
+
   location.href = `/event-admin-login.html?eventId=${encodeURIComponent(eventId)}`;
 }
 
