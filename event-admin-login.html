@@ -8,10 +8,11 @@
 
 <body class="min-h-screen">
   <div class="relative isolate overflow-hidden min-h-screen">
+    <!-- Background -->
     <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.25),_transparent_55%)]"></div>
     <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.25),_transparent_55%)]"></div>
 
-    <!-- HEADER -->
+    <!-- Header -->
     <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <span class="text-2xl">🔐</span>
@@ -22,11 +23,11 @@
       </a>
     </header>
 
-    <!-- MAIN -->
+    <!-- Main -->
     <main class="max-w-6xl mx-auto px-6 py-10">
       <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-start">
 
-        <!-- LEFT: CONTEXT -->
+        <!-- Left: Context -->
         <section class="space-y-6">
           <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
             Secure admin authentication
@@ -45,19 +46,19 @@
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p class="text-sm font-semibold">Google-verified identity</p>
               <p class="text-sm text-slate-300 mt-2">
-                Authentication handled by Google OAuth.
+                Authentication handled entirely by Google OAuth.
               </p>
             </div>
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
               <p class="text-sm font-semibold">Event-scoped access</p>
               <p class="text-sm text-slate-300 mt-2">
-                Access limited to events you’re authorized for.
+                Access is limited to events you’re authorized for.
               </p>
             </div>
           </div>
         </section>
 
-        <!-- RIGHT: LOGIN CARD -->
+        <!-- Right: Login Card -->
         <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
           <h2 class="text-2xl font-semibold">Admin sign in</h2>
           <p class="mt-2 text-sm text-slate-500">
@@ -104,6 +105,7 @@
 <script>
 const params = new URLSearchParams(location.search);
 const eventIdParam = params.get("eventId");
+
 if (eventIdParam) {
   const input = document.getElementById("eventId");
   input.value = eventIdParam;
@@ -113,18 +115,21 @@ if (eventIdParam) {
 document.getElementById("googleLoginBtn").addEventListener("click", () => {
   const eventId = document.getElementById("eventId").value.trim();
   const status = document.getElementById("status");
+  const btn = document.getElementById("googleLoginBtn");
 
   if (!eventId) {
     status.textContent = "Event ID is required.";
     return;
   }
 
+  btn.disabled = true;
+  btn.classList.add("opacity-60", "cursor-not-allowed");
+
   const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
-  // Redirect to Worker OAuth start endpoint
+  // Correct OAuth start endpoint
   window.location.href =
-    `${API_BASE}/api/oauth/google/start?eventId=` +
-    encodeURIComponent(eventId);
+    `${API_BASE}/oauth/start?eventId=` + encodeURIComponent(eventId);
 });
 </script>
 
