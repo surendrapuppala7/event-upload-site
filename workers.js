@@ -107,6 +107,17 @@ function normalizeBirthday(value) {
   return raw;
 }
 
+function normalizeEventDate(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString().slice(0, 10);
+  }
+  return "";
+}
+
 function normalizeEventIdInput(raw) {
   return clamp(raw, 64);
 }
@@ -619,18 +630,18 @@ export default {
       let result;
       if (staffRole) {
         result = await env.DB.prepare(`
-          SELECT id, name, owner, created_at, active
+          SELECT id, name, owner, created_at, active, event_date
           FROM events
           ORDER BY created_at DESC
           LIMIT 200
         `).all();
       } else {
         result = await env.DB.prepare(`
-          SELECT id, name, owner, created_at, 'owner' AS role
+          SELECT id, name, owner, created_at, event_date, 'owner' AS role
           FROM events
           WHERE lower(owner) = ?
           UNION ALL
-          SELECT e.id, e.name, e.owner, e.created_at, 'admin' AS role
+          SELECT e.id, e.name, e.owner, e.created_at, e.event_date, 'admin' AS role
           FROM events e
           JOIN event_admins a ON a.event_id = e.id
           WHERE lower(a.email) = ? AND lower(e.owner) != ?
@@ -652,6 +663,7 @@ export default {
 
       const body = await req.json().catch(() => null);
       const name = clamp(body?.name, 120);
+      const eventDate = normalizeEventDate(body?.event_date);
       if (!name) return jsonResponse({ error: "name required" }, 400, cors);
 
       const owner = normalizeEmail(sess.email);
@@ -672,18 +684,42 @@ export default {
       const eventId = await generateUniqueEventId(env);
       const createdAt = new Date().toISOString();
 
-      try {
-        await env.DB.prepare(
-          "INSERT INTO events (id, name, owner, created_at, active) VALUES (?, ?, ?, ?, 1)"
-        )
-          .bind(eventId, name, owner, createdAt)
-          .run();
-      } catch (err) {
-        await env.DB.prepare(
-          "INSERT INTO events (id, name, owner, created_at) VALUES (?, ?, ?, ?)"
-        )
-          .bind(eventId, name, owner, createdAt)
-          .run();
+      if (eventDate) {
+        try {
+          await env.DB.prepare(
+            "INSERT INTO events (id, name, owner, created_at, active, event_date) VALUES (?, ?, ?, ?, 1, ?)"
+          )
+            .bind(eventId, name, owner, createdAt, eventDate)
+            .run();
+        } catch (err) {
+          try {
+            await env.DB.prepare(
+              "INSERT INTO events (id, name, owner, created_at, event_date) VALUES (?, ?, ?, ?, ?)"
+            )
+              .bind(eventId, name, owner, createdAt, eventDate)
+              .run();
+          } catch (err2) {
+            await env.DB.prepare(
+              "INSERT INTO events (id, name, owner, created_at, active) VALUES (?, ?, ?, ?, 1)"
+            )
+              .bind(eventId, name, owner, createdAt)
+              .run();
+          }
+        }
+      } else {
+        try {
+          await env.DB.prepare(
+            "INSERT INTO events (id, name, owner, created_at, active) VALUES (?, ?, ?, ?, 1)"
+          )
+            .bind(eventId, name, owner, createdAt)
+            .run();
+        } catch (err) {
+          await env.DB.prepare(
+            "INSERT INTO events (id, name, owner, created_at) VALUES (?, ?, ?, ?)"
+          )
+            .bind(eventId, name, owner, createdAt)
+            .run();
+        }
       }
 
       return jsonResponse({ eventId }, 200, cors);

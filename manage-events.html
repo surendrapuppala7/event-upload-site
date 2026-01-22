@@ -400,6 +400,8 @@
           <div style="margin-top: 16px;">
             <label for="eventName">Event name</label>
             <input id="eventName" type="text" maxlength="120" placeholder="e.g. Sofia's Birthday" />
+            <label for="eventDate" style="margin-top: 12px; display: block;">Event date</label>
+            <input id="eventDate" type="date" />
             <button id="createBtn" class="button primary" style="margin-top: 14px; width: 100%;">Create event</button>
             <p id="createStatus" class="status" aria-live="polite"></p>
           </div>
@@ -464,6 +466,7 @@ const signInBtn = document.getElementById("signInBtn");
 const signOutBtn = document.getElementById("signOutBtn");
 const refreshBtn = document.getElementById("refreshBtn");
 const createBtn = document.getElementById("createBtn");
+const eventDateInput = document.getElementById("eventDate");
 
 signInBtn.addEventListener("click", () => {
   window.location.href = `${API_BASE}/oauth/user/start`;
@@ -659,6 +662,7 @@ async function loadEvents() {
 
 async function createEvent() {
   const name = document.getElementById("eventName").value.trim();
+  const eventDate = eventDateInput ? eventDateInput.value : "";
   if (!name) {
     setStatus(createStatus, "Please enter an event name.", "err");
     return;
@@ -678,7 +682,7 @@ async function createEvent() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name, event_date: eventDate })
     });
 
     const data = await res.json().catch(() => ({}));
@@ -699,6 +703,7 @@ async function createEvent() {
 
     setStatus(createStatus, "Event created! Scroll down to open it.", "ok");
     document.getElementById("eventName").value = "";
+    if (eventDateInput) eventDateInput.value = "";
     await loadEvents();
   } catch (err) {
     console.error(err);
@@ -731,6 +736,13 @@ function buildEventCard(ev) {
   created.className = "card-meta";
   created.textContent = `Created: ${ev.created_at}`;
 
+  let eventDate = null;
+  if (ev.event_date) {
+    eventDate = document.createElement("p");
+    eventDate.className = "card-meta";
+    eventDate.textContent = `Event date: ${ev.event_date}`;
+  }
+
   const actions = document.createElement("div");
   actions.className = "card-actions";
 
@@ -750,6 +762,7 @@ function buildEventCard(ev) {
   card.appendChild(title);
   card.appendChild(code);
   card.appendChild(created);
+  if (eventDate) card.appendChild(eventDate);
   card.appendChild(actions);
 
   return card;
