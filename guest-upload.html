@@ -143,6 +143,51 @@
       font-weight: 600;
     }
 
+    .qr-block {
+      margin: 18px 0 16px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px dashed #f1d9cf;
+      background: #fff9f4;
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+    }
+
+    .qr-block.hidden {
+      display: none;
+    }
+
+    .qr-image {
+      width: 200px;
+      height: 200px;
+      border-radius: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      object-fit: cover;
+    }
+
+    .qr-link {
+      font-size: 0.85rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .qr-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .button.secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid #f1d9cf;
+      box-shadow: none;
+    }
+
     .spinner {
       margin-top: 14px;
       display: none;
@@ -195,6 +240,14 @@
       <a class="home-link" href="index.html">Back to home</a>
       <h1 id="eventName">Upload to event</h1>
       <p id="eventMessage" class="subhead">Take a photo or record a video to upload.</p>
+      <div id="qrBlock" class="qr-block hidden">
+        <img id="qrImage" class="qr-image" alt="QR code for guest upload" />
+        <div class="qr-link" id="qrLink"></div>
+        <div class="qr-actions">
+          <button id="copyLinkBtn" class="button secondary" type="button">Copy guest link</button>
+          <a id="downloadQrBtn" class="button secondary" href="#" download="kachow-guest-qr.png">Download QR</a>
+        </div>
+      </div>
       <button id="btn" class="button">📸 Take Photo / 🎥 Record Video</button>
       <p id="status" class="status"></p>
       <div id="spinner" class="spinner">
@@ -210,6 +263,11 @@
 const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
 const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+const qrBlock = document.getElementById("qrBlock");
+const qrImage = document.getElementById("qrImage");
+const qrLink = document.getElementById("qrLink");
+const copyLinkBtn = document.getElementById("copyLinkBtn");
+const downloadQrBtn = document.getElementById("downloadQrBtn");
 
 if (!eventId) {
   document.getElementById("eventName").innerText = "Invalid event link";
@@ -218,6 +276,24 @@ if (!eventId) {
   document.getElementById("eventName").innerText = "Upload to Event: " + eventId;
   document.getElementById("eventMessage").innerText =
     "Take a photo or record a video to upload.";
+
+  const guestUrl = `${location.origin}/guest-upload.html?eventId=${encodeURIComponent(eventId)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(guestUrl)}`;
+
+  qrImage.src = qrUrl;
+  qrLink.textContent = guestUrl;
+  downloadQrBtn.href = qrUrl;
+  qrBlock.classList.remove("hidden");
+
+  copyLinkBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(guestUrl);
+      copyLinkBtn.textContent = "Copied!";
+      setTimeout(() => (copyLinkBtn.textContent = "Copy guest link"), 1600);
+    } catch {
+      prompt("Copy this guest link:", guestUrl);
+    }
+  });
 }
 
 async function uploadFile(file) {
