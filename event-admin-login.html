@@ -1,105 +1,334 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-slate-950 text-white">
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Event Admin Login</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Event Admin Login • Kachow</title>
+  <meta name="description" content="Sign in to manage your Kachow event." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #fff7f1;
+      --ink: #1b1b1f;
+      --muted: #5c5d69;
+      --brand: #ff6b6b;
+      --brand-2: #5bc0eb;
+      --brand-3: #ffd166;
+      --brand-4: #9b5de5;
+      --card: #ffffff;
+      --line: #f0e5dc;
+      --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
+      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
+        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
+        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
+        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 26px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-mark svg {
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-text {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    nav {
+      display: inline-flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .nav-group { position: relative; padding-bottom: 10px; }
+    .nav-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+    .nav-trigger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 20px rgba(22, 20, 32, 0.12);
+    }
+    .nav-menu {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 6px;
+      min-width: 200px;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      padding: 10px;
+      display: none;
+      z-index: 5;
+    }
+    .nav-group:hover .nav-menu,
+    .nav-group:focus-within .nav-menu,
+    .nav-menu:hover {
+      display: grid;
+      gap: 6px;
+    }
+    .nav-menu a {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      transition: background 0.2s var(--ease);
+    }
+    .nav-menu a:hover {
+      background: rgba(255, 214, 184, 0.5);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 26px;
+      align-items: start;
+      padding-bottom: 36px;
+    }
+
+    h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2rem, 3vw, 2.6rem);
+      margin: 0 0 8px;
+    }
+
+    .subhead {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1b2433;
+    }
+
+    input {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #d7deea;
+      font-size: 0.98rem;
+      font-family: inherit;
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+
+    input:focus {
+      border-color: rgba(11, 61, 145, 0.5);
+      box-shadow: 0 0 0 3px rgba(11, 61, 145, 0.12);
+      outline: none;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: 1px solid #e3e7ef;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(22, 20, 32, 0.15);
+    }
+
+    .status {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #b42318;
+      font-weight: 700;
+    }
+
+    .info-cards {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      margin-top: 16px;
+    }
+
+    .info-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+
+    @media (max-width: 720px) {
+      header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
+  </style>
 </head>
-
-<body class="min-h-screen">
-  <div class="relative isolate overflow-hidden min-h-screen">
-    <!-- Background -->
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.25),_transparent_55%)]"></div>
-    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(14,165,233,0.25),_transparent_55%)]"></div>
-
-    <!-- Header -->
-    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">🔐</span>
-        <span class="text-lg font-semibold">Event Admin Portal</span>
-      </div>
-      <a href="index.html" class="text-sm text-slate-300 hover:text-white">
-        Back to Home
-      </a>
-    </header>
-
-    <!-- Main -->
-    <main class="max-w-6xl mx-auto px-6 py-10">
-      <div class="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] items-start">
-
-        <!-- Left: Context -->
-        <section class="space-y-6">
-          <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs text-slate-200">
-            Secure admin authentication
-          </p>
-
-          <h1 class="text-4xl font-semibold leading-tight">
-            Sign in securely to manage your event.
-          </h1>
-
-          <p class="text-slate-300">
-            Event administrators authenticate using Google.
-            No passwords are stored or handled by this platform.
-          </p>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p class="text-sm font-semibold">Google-verified identity</p>
-              <p class="text-sm text-slate-300 mt-2">
-                Authentication handled entirely by Google OAuth.
-              </p>
+<body>
+  <div class="page">
+    <div class="container">
+      <header>
+        <a class="logo" href="index.html">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
+                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
+                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
+                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
+                <circle cx="122" cy="34" r="4" fill="#203040"/>
+                <circle cx="70" cy="70" r="30" fill="#203040"/>
+                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
+                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
+                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
+                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
+                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
+                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
+              </g>
+            </svg>
+          </span>
+          <span class="logo-text">KACHOW</span>
+        </a>
+        <nav>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Explore ▾</button>
+            <div class="nav-menu">
+              <a href="index.html#how-it-works">How it works</a>
+              <a href="pricing.html">Pricing</a>
+              <a href="create-event.html">Create event</a>
+              <a href="manage-events.html">Manage events</a>
+              <a href="gallery.html">Gallery</a>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p class="text-sm font-semibold">Event-scoped access</p>
-              <p class="text-sm text-slate-300 mt-2">
-                Access is limited to events you’re authorized for.
-              </p>
+          </div>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Account ▾</button>
+            <div class="nav-menu">
+              <a href="event-admin-login.html">Sign in</a>
+              <a href="create-event.html">Create account</a>
+              <a href="super-admin-login.html">Admin</a>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <main class="layout">
+        <section>
+          <h1>Event admin access</h1>
+          <p class="subhead">Sign in with Google to manage your event uploads.</p>
+          <div class="info-cards">
+            <div class="info-card">
+              <strong>Google-verified identity</strong>
+              <p class="subhead">Authentication is handled entirely by Google OAuth.</p>
+            </div>
+            <div class="info-card">
+              <strong>Event-scoped access</strong>
+              <p class="subhead">Access is limited to events you’re authorized for.</p>
             </div>
           </div>
         </section>
 
-        <!-- Right: Login Card -->
-        <section class="bg-white text-slate-900 rounded-3xl shadow-2xl p-8">
-          <h2 class="text-2xl font-semibold">Admin sign in</h2>
-          <p class="mt-2 text-sm text-slate-500">
-            Enter your Event ID, then continue with Google.
-          </p>
-
-          <div class="mt-6 space-y-5">
-            <div>
-              <label for="eventId" class="text-sm font-semibold text-slate-700">
-                Event ID
-              </label>
-              <input
-                id="eventId"
-                required
-                placeholder="e.g. EVT-AB1234"
-                class="w-full mt-2 rounded-xl border border-slate-200 px-4 py-3
-                       text-slate-900 shadow-sm focus:border-indigo-500
-                       focus:outline-none focus:ring-2 focus:ring-indigo-200" />
-            </div>
-
-            <button
-              id="googleLoginBtn"
-              class="w-full flex items-center justify-center gap-3
-                     rounded-xl border border-slate-300 bg-white py-3
-                     font-semibold shadow hover:bg-slate-50 transition">
-              <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-                <path fill="#EA4335" d="M24 9.5c3.54 0 6.01 1.54 7.39 2.82l5.46-5.46C33.47 3.54 29.13 1.5 24 1.5 14.78 1.5 6.87 6.98 3.14 14.9l6.64 5.16C11.4 13.02 17.22 9.5 24 9.5z"/>
-                <path fill="#4285F4" d="M46.1 24.5c0-1.56-.14-3.06-.4-4.5H24v9.02h12.44c-.54 2.9-2.16 5.36-4.6 7.02l7.05 5.48C43.27 37.38 46.1 31.5 46.1 24.5z"/>
-                <path fill="#FBBC05" d="M9.78 28.06a14.7 14.7 0 0 1 0-8.12l-6.64-5.16A23.92 23.92 0 0 0 1.5 24c0 3.86.92 7.5 2.64 10.78l6.64-5.16z"/>
-                <path fill="#34A853" d="M24 46.5c6.13 0 11.28-2.03 15.04-5.52l-7.05-5.48c-1.96 1.32-4.48 2.1-7.99 2.1-6.78 0-12.6-3.52-14.22-8.56l-6.64 5.16C6.87 41.02 14.78 46.5 24 46.5z"/>
-              </svg>
-              Continue with Google
-            </button>
-
-            <p id="status"
-               class="text-center text-sm font-medium text-rose-600"
-               aria-live="polite"></p>
+        <section class="panel">
+          <h2 style="margin: 0 0 6px; font-family: 'Fraunces', serif;">Admin sign in</h2>
+          <p class="subhead">Enter your Event ID, then continue with Google.</p>
+          <div style="margin-top: 16px;">
+            <label for="eventId">Event ID</label>
+            <input id="eventId" required placeholder="e.g. EVT-AB1234" />
           </div>
+          <button id="googleLoginBtn" class="button" style="margin-top: 16px; width: 100%;">
+            <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.01 1.54 7.39 2.82l5.46-5.46C33.47 3.54 29.13 1.5 24 1.5 14.78 1.5 6.87 6.98 3.14 14.9l6.64 5.16C11.4 13.02 17.22 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.1 24.5c0-1.56-.14-3.06-.4-4.5H24v9.02h12.44c-.54 2.9-2.16 5.36-4.6 7.02l7.05 5.48C43.27 37.38 46.1 31.5 46.1 24.5z"/>
+              <path fill="#FBBC05" d="M9.78 28.06a14.7 14.7 0 0 1 0-8.12l-6.64-5.16A23.92 23.92 0 0 0 1.5 24c0 3.86.92 7.5 2.64 10.78l6.64-5.16z"/>
+              <path fill="#34A853" d="M24 46.5c6.13 0 11.28-2.03 15.04-5.52l-7.05-5.48c-1.96 1.32-4.48 2.1-7.99 2.1-6.78 0-12.6-3.52-14.22-8.56l-6.64 5.16C6.87 41.02 14.78 46.5 24 46.5z"/>
+            </svg>
+            Continue with Google
+          </button>
+          <p id="status" class="status" aria-live="polite"></p>
         </section>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 
 <script>
@@ -118,20 +347,15 @@ document.getElementById("googleLoginBtn").addEventListener("click", () => {
   const btn = document.getElementById("googleLoginBtn");
 
   if (!eventId) {
-    status.textContent = "Event ID is required.";
+    status.textContent = "Please enter your Event ID.";
     return;
   }
 
+  status.textContent = "";
   btn.disabled = true;
-  btn.classList.add("opacity-60", "cursor-not-allowed");
 
-  const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
-
-  // Correct OAuth start endpoint
-  window.location.href =
-    `${API_BASE}/oauth/start?eventId=` + encodeURIComponent(eventId);
+  window.location.href = `/api/event-admin/google-login?eventId=${encodeURIComponent(eventId)}`;
 });
 </script>
-
 </body>
 </html>

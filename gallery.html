@@ -1,73 +1,270 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-slate-950 text-white">
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Event Gallery (Admin)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Event Gallery • Kachow</title>
+  <meta name="description" content="Browse and preview event uploads." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <style>
+    :root {
+      --bg: #fff7f1;
+      --ink: #1b1b1f;
+      --muted: #5c5d69;
+      --brand: #ff6b6b;
+      --brand-2: #5bc0eb;
+      --brand-3: #ffd166;
+      --brand-4: #9b5de5;
+      --card: #ffffff;
+      --line: #f0e5dc;
+      --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
+      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
+        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
+        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
+        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 26px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-mark svg {
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-text {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+      cursor: pointer;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--brand), #ff8f8f);
+      color: #fff;
+    }
+
+    .button.secondary {
+      background: rgba(255, 214, 184, 0.6);
+      color: #1b1b1f;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(22, 20, 32, 0.15);
+    }
+
+    h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      margin: 0;
+    }
+
+    .subhead {
+      color: var(--muted);
+      margin: 6px 0 0;
+    }
+
+    .grid {
+      margin-top: 18px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
     .media-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
     .media-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.55);
+      box-shadow: var(--shadow);
+    }
+
+    .media-preview {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #f6efe7;
+    }
+
+    .media-meta {
+      padding: 12px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .notice {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(255, 107, 107, 0.35);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--muted);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 12, 18, 0.7);
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .modal-card {
+      width: min(900px, 100%);
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .modal-media {
+      max-height: 70vh;
+      width: 100%;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      background: #f6efe7;
     }
   </style>
 </head>
+<body>
+  <div class="page">
+    <div class="container">
+      <header>
+        <a class="logo" href="index.html">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
+                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
+                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
+                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
+                <circle cx="122" cy="34" r="4" fill="#203040"/>
+                <circle cx="70" cy="70" r="30" fill="#203040"/>
+                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
+                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
+                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
+                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
+                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
+                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
+              </g>
+            </svg>
+          </span>
+          <span class="logo-text">KACHOW</span>
+        </a>
+        <div class="toolbar">
+          <a class="button secondary" href="index.html">Home</a>
+          <button id="refreshBtn" class="button secondary">Refresh</button>
+          <button id="logoutBtn" class="button primary">Logout</button>
+        </div>
+      </header>
 
-<body class="min-h-screen">
-  <div class="relative isolate overflow-hidden min-h-screen">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.25),_transparent_60%)]"></div>
+      <section>
+        <h1>Event gallery</h1>
+        <p id="info" class="subhead"></p>
+      </section>
 
-    <!-- HEADER -->
-    <header class="max-w-6xl mx-auto px-6 py-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <div>
-        <p class="text-xs uppercase tracking-wide text-slate-400">Event admin</p>
-        <h1 class="text-3xl font-semibold">Event gallery</h1>
-        <p id="info" class="mt-2 text-sm text-slate-300"></p>
-      </div>
-
-      <div class="flex gap-3">
-        <button id="refreshBtn"
-          class="rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold hover:bg-white/20 transition">
-          Refresh
-        </button>
-        <button id="logoutBtn"
-          class="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold hover:bg-rose-500 transition">
-          Logout
-        </button>
-      </div>
-    </header>
-
-    <!-- MAIN -->
-    <main class="max-w-6xl mx-auto px-6 pb-16">
-      <div id="grid"
-           class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      </div>
-    </main>
+      <main class="grid" id="grid"></main>
+    </div>
   </div>
 
-  <!-- PREVIEW MODAL -->
-  <div id="modal"
-       class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4">
-    <div class="w-full max-w-5xl rounded-2xl bg-slate-900 border border-white/10 p-4">
-      <div class="flex items-center justify-between mb-3">
-        <p class="text-sm text-slate-300">Preview</p>
-        <button id="closeModal"
-          class="text-sm text-slate-300 hover:text-white">
-          Close
-        </button>
+  <div id="modal" class="modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <strong>Preview</strong>
+        <button id="closeModal" class="button secondary">Close</button>
       </div>
-
-      <img id="modalImg"
-           class="hidden max-h-[75vh] w-full rounded-lg object-contain"
-           alt="Preview image" />
-
-      <video id="modalVideo"
-             class="hidden max-h-[75vh] w-full rounded-lg"
-             controls></video>
+      <img id="modalImg" class="modal-media" alt="Preview image" />
+      <video id="modalVideo" class="modal-media" controls></video>
     </div>
   </div>
 
@@ -93,13 +290,14 @@ document.getElementById("modal").addEventListener("click", (e) => {
 });
 
 async function loadFiles() {
-  grid.innerHTML = loadingCard("Loading uploads…");
+  grid.innerHTML = "";
+  grid.appendChild(noticeCard("Loading uploads…"));
 
   try {
     const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      credentials: "include", // 🔐 OAuth cookie
+      credentials: "include",
       body: JSON.stringify({ eventId })
     });
 
@@ -111,126 +309,97 @@ async function loadFiles() {
     const data = await res.json();
 
     if (!res.ok) {
-      grid.innerHTML = errorCard(data.error || "Failed to load uploads.");
+      grid.innerHTML = "";
+      grid.appendChild(noticeCard(data.error || "Failed to load uploads."));
       return;
     }
 
     const files = Array.isArray(data.files) ? data.files : [];
 
     if (files.length === 0) {
-      info.textContent = "No uploads yet for this event.";
-      grid.innerHTML = emptyCard();
+      grid.innerHTML = "";
+      grid.appendChild(noticeCard("No uploads yet."));
       return;
     }
 
-    info.textContent = `Showing ${files.length} upload(s).`;
     grid.innerHTML = "";
-
-    for (const file of files) {
-      grid.appendChild(buildMediaCard(file));
-    }
-  } catch (err) {
-    console.error(err);
-    grid.innerHTML = errorCard("Network error. Please try again.");
+    files.forEach(file => {
+      grid.appendChild(buildCard(file));
+    });
+  } catch (error) {
+    console.error(error);
+    grid.innerHTML = "";
+    grid.appendChild(noticeCard("Network error. Please try again."));
   }
 }
 
-function buildMediaCard(file) {
+function noticeCard(text) {
+  const div = document.createElement("div");
+  div.className = "notice";
+  div.textContent = text;
+  return div;
+}
+
+function buildCard(file) {
+  const url = `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
+  const ext = file.name.toLowerCase();
+  const isImage = ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp");
+
   const card = document.createElement("div");
-  card.className =
-    "media-card rounded-2xl overflow-hidden bg-white/5 border border-white/10";
+  card.className = "media-card";
+  card.addEventListener("click", () => openModal(url, isImage));
 
-  const isVideo = file.name.toLowerCase().endsWith(".mp4");
-  const url =
-    `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
-
-  const preview = document.createElement(isVideo ? "video" : "img");
-  preview.src = url;
-  preview.className = "h-44 w-full object-cover bg-black";
-  if (isVideo) preview.muted = true;
+  if (isImage) {
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = file.name;
+    img.className = "media-preview";
+    card.appendChild(img);
+  } else {
+    const video = document.createElement("video");
+    video.src = url;
+    video.className = "media-preview";
+    video.muted = true;
+    card.appendChild(video);
+  }
 
   const meta = document.createElement("div");
-  meta.className = "p-3";
-
-  const type = document.createElement("p");
-  type.className = "text-xs uppercase tracking-wide text-slate-400";
-  type.textContent = isVideo ? "Video" : "Photo";
-
-  const name = document.createElement("p");
-  name.className = "mt-1 text-sm font-medium truncate";
-  name.textContent = file.name;
-
-  meta.appendChild(type);
-  meta.appendChild(name);
-
-  card.appendChild(preview);
+  meta.className = "media-meta";
+  meta.textContent = file.name;
   card.appendChild(meta);
-  card.addEventListener("click", () => openModal(url, isVideo));
 
   return card;
 }
 
-function openModal(src, isVideo) {
+function openModal(url, isImage) {
   const modal = document.getElementById("modal");
   const img = document.getElementById("modalImg");
   const video = document.getElementById("modalVideo");
 
-  img.classList.add("hidden");
-  video.classList.add("hidden");
-  video.pause();
-
-  if (isVideo) {
-    video.src = src;
-    video.classList.remove("hidden");
+  if (isImage) {
+    img.src = url;
+    img.style.display = "block";
+    video.style.display = "none";
   } else {
-    img.src = src;
-    img.classList.remove("hidden");
+    video.src = url;
+    video.style.display = "block";
+    img.style.display = "none";
   }
-
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
+  modal.style.display = "flex";
 }
 
 function closeModal() {
-  document.getElementById("modal").classList.add("hidden");
-  document.getElementById("modalVideo").pause();
+  const modal = document.getElementById("modal");
+  const video = document.getElementById("modalVideo");
+  modal.style.display = "none";
+  video.pause();
 }
 
-async function logout() {
-  await fetch(`${API_BASE}/api/event-admin/logout`, {
-    method: "POST",
-    credentials: "include"
-  });
-
-  location.href = `/event-admin-login.html?eventId=${encodeURIComponent(eventId)}`;
-}
-
-function loadingCard(text) {
-  return `
-    <div class="col-span-full rounded-2xl bg-white/5 border border-white/10 p-6 text-sm text-slate-300">
-      ${text}
-    </div>
-  `;
-}
-
-function emptyCard() {
-  return `
-    <div class="col-span-full rounded-2xl bg-white/5 border border-white/10 p-6 text-sm text-slate-300">
-      No uploads yet. Check back after guests start uploading.
-    </div>
-  `;
-}
-
-function errorCard(text) {
-  return `
-    <div class="col-span-full rounded-2xl bg-white/5 border border-rose-500/30 p-6 text-sm text-rose-400">
-      ${text}
-    </div>
-  `;
+function logout() {
+  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
 }
 
 loadFiles();
 </script>
-
 </body>
 </html>

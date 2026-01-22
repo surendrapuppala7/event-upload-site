@@ -1,68 +1,344 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-slate-950 text-white">
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Manage Events</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Manage Events • Kachow</title>
+  <meta name="description" content="View and manage your Kachow events." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #fff7f1;
+      --ink: #1b1b1f;
+      --muted: #5c5d69;
+      --brand: #ff6b6b;
+      --brand-2: #5bc0eb;
+      --brand-3: #ffd166;
+      --brand-4: #9b5de5;
+      --card: #ffffff;
+      --line: #f0e5dc;
+      --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
+      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
+        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
+        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
+        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 26px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-mark svg {
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-text {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    nav {
+      display: inline-flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .nav-group { position: relative; padding-bottom: 10px; }
+    .nav-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+    .nav-trigger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 20px rgba(22, 20, 32, 0.12);
+    }
+    .nav-menu {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 6px;
+      min-width: 200px;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      padding: 10px;
+      display: none;
+      z-index: 5;
+    }
+    .nav-group:hover .nav-menu,
+    .nav-group:focus-within .nav-menu,
+    .nav-menu:hover {
+      display: grid;
+      gap: 6px;
+    }
+    .nav-menu a {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      transition: background 0.2s var(--ease);
+    }
+    .nav-menu a:hover {
+      background: rgba(255, 214, 184, 0.5);
+    }
+
+    h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(2rem, 3vw, 2.6rem);
+      margin: 8px 0 6px;
+    }
+
+    .subhead {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      max-width: 560px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1b2433;
+    }
+
+    input {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid #d7deea;
+      font-size: 0.98rem;
+      font-family: inherit;
+      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+
+    input:focus {
+      border-color: rgba(11, 61, 145, 0.5);
+      box-shadow: 0 0 0 3px rgba(11, 61, 145, 0.12);
+      outline: none;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+      cursor: pointer;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--brand), #ff8f8f);
+      color: #fff;
+    }
+
+    .button.secondary {
+      background: linear-gradient(135deg, var(--brand-2), #7bd3f4);
+      color: #0b1220;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(22, 20, 32, 0.15);
+    }
+
+    .status {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .grid {
+      margin-top: 24px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      font-size: 1.1rem;
+    }
+
+    .card-meta {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .card-meta.small {
+      font-size: 0.8rem;
+    }
+
+    .card-actions {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    @media (max-width: 720px) {
+      header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
+  </style>
 </head>
+<body>
+  <div class="page">
+    <div class="container">
+      <header>
+        <a class="logo" href="index.html">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
+                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
+                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
+                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
+                <circle cx="122" cy="34" r="4" fill="#203040"/>
+                <circle cx="70" cy="70" r="30" fill="#203040"/>
+                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
+                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
+                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
+                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
+                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
+                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
+              </g>
+            </svg>
+          </span>
+          <span class="logo-text">KACHOW</span>
+        </a>
+        <nav>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Explore ▾</button>
+            <div class="nav-menu">
+              <a href="index.html#how-it-works">How it works</a>
+              <a href="pricing.html">Pricing</a>
+              <a href="create-event.html">Create event</a>
+              <a href="manage-events.html">Manage events</a>
+              <a href="gallery.html">Gallery</a>
+            </div>
+          </div>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Account ▾</button>
+            <div class="nav-menu">
+              <a href="event-admin-login.html">Sign in</a>
+              <a href="create-event.html">Create account</a>
+              <a href="super-admin-login.html">Admin</a>
+            </div>
+          </div>
+        </nav>
+      </header>
 
-<body class="min-h-screen">
-  <div class="relative isolate overflow-hidden min-h-screen">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.25),_transparent_55%)]"></div>
+      <main>
+        <section>
+          <h1>Manage your events</h1>
+          <p class="subhead">Enter your email to view the events you have created.</p>
+        </section>
 
-    <!-- HEADER -->
-    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">📋</span>
-        <span class="text-lg font-semibold">Manage My Events</span>
-      </div>
-      <a href="index.html" class="text-sm text-slate-300 hover:text-white">
-        Back to Home
-      </a>
-    </header>
+        <section class="panel" style="margin-top: 18px;">
+          <label for="ownerEmail">Owner email</label>
+          <input id="ownerEmail" type="email" required placeholder="you@email.com" />
+          <button id="loadButton" class="button primary" style="margin-top: 14px; width: 100%;">Load events</button>
+          <p id="status" class="status" aria-live="polite"></p>
+        </section>
 
-    <!-- MAIN -->
-    <main class="max-w-6xl mx-auto px-6 pb-16 pt-6">
-
-      <!-- EMAIL INPUT CARD -->
-      <section class="max-w-xl mx-auto bg-white/5 border border-white/10 rounded-3xl p-6 shadow-xl">
-        <h2 class="text-xl font-semibold">View your events</h2>
-        <p class="mt-1 text-sm text-slate-300">
-          Enter the email you used when creating events.
-        </p>
-
-        <div class="mt-4 space-y-3">
-          <label for="ownerEmail" class="text-sm font-semibold text-slate-200">
-            Owner email
-          </label>
-          <input id="ownerEmail" type="email" required
-            placeholder="you@email.com"
-            class="w-full rounded-xl border border-white/10 bg-slate-900
-                   px-4 py-3 text-white shadow-sm
-                   focus:border-indigo-500 focus:outline-none
-                   focus:ring-2 focus:ring-indigo-500/30" />
-
-          <button id="loadButton"
-            class="w-full rounded-xl bg-indigo-600 py-3
-                   text-white font-semibold shadow
-                   hover:bg-indigo-500 transition
-                   disabled:opacity-60 disabled:cursor-not-allowed">
-            Load events
-          </button>
-        </div>
-
-        <p id="status"
-           class="mt-4 text-center text-sm text-slate-300"
-           aria-live="polite"></p>
-      </section>
-
-      <!-- EVENTS GRID -->
-      <section class="mt-10">
-        <div id="eventsGrid"
-             class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
-      </section>
-
-    </main>
+        <section class="grid" id="eventsGrid"></section>
+      </main>
+    </div>
   </div>
 
 <script>
@@ -119,37 +395,31 @@ async function loadEvents() {
 
 function buildEventCard(ev) {
   const card = document.createElement("div");
-  card.className =
-    "rounded-2xl bg-white/5 border border-white/10 p-6 shadow-xl " +
-    "transition hover:shadow-2xl hover:-translate-y-1";
+  card.className = "card";
 
   const title = document.createElement("h3");
-  title.className = "text-xl font-semibold";
+  title.className = "card-title";
   title.textContent = ev.name || "Untitled Event";
 
   const meta = document.createElement("p");
-  meta.className = "mt-1 text-sm text-slate-300";
+  meta.className = "card-meta";
   meta.textContent = `Event ID: ${ev.id}`;
 
   const created = document.createElement("p");
-  created.className = "mt-1 text-xs text-slate-400";
+  created.className = "card-meta small";
   created.textContent = `Created: ${ev.created_at}`;
 
   const actions = document.createElement("div");
-  actions.className = "mt-5 flex flex-col gap-3";
+  actions.className = "card-actions";
 
   const uploadLink = document.createElement("a");
   uploadLink.href = `/guest-upload.html?eventId=${encodeURIComponent(ev.id)}`;
-  uploadLink.className =
-    "text-center rounded-lg bg-emerald-600 py-2 text-white " +
-    "font-semibold hover:bg-emerald-500 transition";
+  uploadLink.className = "button secondary";
   uploadLink.textContent = "Open guest upload";
 
   const adminLink = document.createElement("a");
   adminLink.href = `/event-admin-login.html?eventId=${encodeURIComponent(ev.id)}`;
-  adminLink.className =
-    "text-center rounded-lg bg-indigo-600 py-2 text-white " +
-    "font-semibold hover:bg-indigo-500 transition";
+  adminLink.className = "button primary";
   adminLink.textContent = "Admin login";
 
   actions.appendChild(uploadLink);
@@ -163,6 +433,5 @@ function buildEventCard(ev) {
   return card;
 }
 </script>
-
 </body>
 </html>

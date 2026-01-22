@@ -1,153 +1,980 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Event Upload Platform</title>
+  <title>Kachow</title>
+  <meta name="description" content="Playful, QR-first photo and video sharing for events. No apps, no hassle, no missed memories." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #fff7f1;
+      --ink: #1b1b1f;
+      --muted: #5c5d69;
+      --brand: #ff6b6b;
+      --brand-2: #5bc0eb;
+      --brand-3: #ffd166;
+      --brand-4: #9b5de5;
+      --card: #ffffff;
+      --line: #f0e5dc;
+      --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
+      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
+        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
+        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
+        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .float-shapes span {
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(0.5px);
+      opacity: 0.6;
+      animation: drift 10s ease-in-out infinite;
+    }
+    .float-shapes .s1 { width: 160px; height: 160px; background: rgba(255, 107, 107, 0.22); top: 120px; left: -60px; }
+    .float-shapes .s2 { width: 120px; height: 120px; background: rgba(91, 192, 235, 0.25); top: 60px; right: -40px; animation-delay: 1.2s; }
+    .float-shapes .s3 { width: 140px; height: 140px; background: rgba(255, 209, 102, 0.25); bottom: 80px; right: 120px; animation-delay: 2.4s; }
+
+    @keyframes drift {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-14px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 26px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-mark svg {
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-text {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    nav {
+      display: inline-flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .nav-group {
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .nav-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .nav-trigger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 20px rgba(22, 20, 32, 0.12);
+    }
+
+    .nav-menu {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 6px;
+      min-width: 200px;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      padding: 10px;
+      display: none;
+      z-index: 5;
+    }
+
+    .nav-group:hover .nav-menu,
+    .nav-group:focus-within .nav-menu,
+    .nav-menu:hover {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav-menu a {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      transition: background 0.2s var(--ease);
+    }
+
+    .nav-menu a:hover {
+      background: rgba(255, 214, 184, 0.5);
+    }
+
+    .button {
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--brand), #ff8f8f);
+      color: #fff;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(22, 20, 32, 0.15);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      align-items: center;
+      padding: 20px 0 10px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 107, 107, 0.14);
+      color: #b83b3b;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    h1 {
+      font-family: "Fraunces", "Times New Roman", serif;
+      font-size: clamp(2.4rem, 3.8vw, 3.6rem);
+      line-height: 1.1;
+      margin: 14px 0 12px;
+    }
+
+    .typed-wrap {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      color: var(--brand-4);
+    }
+
+    .typed {
+      min-width: 120px;
+      border-bottom: 3px solid var(--brand-3);
+      padding-bottom: 2px;
+    }
+
+    .subhead {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin: 0 0 18px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .hero-card {
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 22px;
+      border: 1px solid rgba(255, 214, 184, 0.8);
+    }
+
+    .hero-card .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      background: rgba(91, 192, 235, 0.2);
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: #0b5b7a;
+    }
+
+    .hero-card h3 {
+      margin: 12px 0 6px;
+      font-size: 1.2rem;
+    }
+
+    .hero-card .row {
+      background: #fff7f1;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-top: 10px;
+      border: 1px dashed #f1d6c5;
+      font-size: 0.92rem;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      border: 1px solid var(--line);
+      text-align: center;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.5rem;
+      font-family: "Fraunces", serif;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .section {
+      padding: 36px 0;
+    }
+
+    .section-title {
+      font-family: "Fraunces", serif;
+      font-size: 2rem;
+      margin: 0 0 8px;
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin: 0;
+      max-width: 560px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-top: 20px;
+    }
+
+    .step-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .step-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .step-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--brand-2);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+    }
+
+    .how-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      margin-top: 24px;
+    }
+
+    .how-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--line);
+    }
+
+    .how-card h4 {
+      margin: 12px 0 6px;
+      font-family: "Fraunces", serif;
+    }
+
+    .how-card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .reviews-track {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      scroll-snap-type: x mandatory;
+      position: relative;
+    }
+
+    .reviews-track::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .reviews-track::-webkit-scrollbar-thumb {
+      background: rgba(27, 27, 31, 0.2);
+      border-radius: 999px;
+    }
+
+    .reviews-track::before,
+    .reviews-track::after {
+      content: "";
+      position: sticky;
+      top: 0;
+      width: 56px;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.25s var(--ease);
+    }
+
+    .reviews-track::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(255, 247, 241, 1), rgba(255, 247, 241, 0));
+    }
+
+    .reviews-track::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(255, 247, 241, 1), rgba(255, 247, 241, 0));
+    }
+
+    .reviews-track:hover::before,
+    .reviews-track:hover::after {
+      opacity: 0.55;
+    }
+
+    .review-card {
+      scroll-snap-align: start;
+      min-width: 300px;
+    }
+
+    .review-stars {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .review-stars svg {
+      width: 18px;
+      height: 18px;
+      fill: url(#starGradient);
+    }
+
+    .quote {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .quote span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .review-meta {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .review-sep {
+      display: grid;
+      place-items: center;
+      color: rgba(27, 27, 31, 0.35);
+    }
+
+    .review-sep {
+      flex: 0 0 auto;
+      margin: 0 -10px;
+    }
+
+    .review-sep svg {
+      width: 64px;
+      height: 24px;
+    }
+
+    .counter-band {
+      background: #1b1b1f;
+      color: #fff;
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      margin-top: 26px;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      align-items: center;
+    }
+
+    .counter {
+      font-family: "Fraunces", serif;
+      font-size: 1.6rem;
+    }
+
+    .cta {
+      background: linear-gradient(135deg, var(--brand-4), var(--brand));
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: grid;
+      gap: 14px;
+      align-items: center;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      box-shadow: var(--shadow);
+    }
+
+    footer {
+      padding: 26px 0 40px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      font-size: 0.9rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: var(--ink);
+    }
+
+    .fade-up { animation: fadeUp 0.7s var(--ease) both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 720px) {
+      header { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .counter-band { text-align: center; }
+    }
+  </style>
 </head>
-
-<body class="bg-slate-950 text-white">
-  <div class="relative isolate overflow-hidden">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.35),_transparent_55%)]"></div>
-    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_top_right,_rgba(14,165,233,0.35),_transparent_55%)]"></div>
-
-    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">📸</span>
-        <span class="text-lg font-semibold">Event Upload Platform</span>
-      </div>
-      <nav class="flex items-center gap-3">
-        <a href="event-admin-login.html"
-          class="rounded-full border border-white/20 px-5 py-2 text-sm font-semibold hover:bg-white/10">
-          Sign In
+<body>
+  <div class="page">
+    <div class="float-shapes" aria-hidden="true">
+      <span class="s1"></span>
+      <span class="s2"></span>
+      <span class="s3"></span>
+    </div>
+    <div class="container">
+      <header>
+        <a class="logo" href="index.html">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
+                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
+                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
+                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
+                <circle cx="122" cy="34" r="4" fill="#203040"/>
+                <circle cx="70" cy="70" r="30" fill="#203040"/>
+                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
+                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
+                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
+                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
+                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
+                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
+              </g>
+            </svg>
+          </span>
+          <span class="logo-text">KACHOW</span>
         </a>
-        <a href="create-event.html"
-          class="rounded-full bg-indigo-500 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-400">
-          Sign Up
-        </a>
-      </nav>
-    </header>
+        <nav>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">
+              Explore ▾
+            </button>
+            <div class="nav-menu">
+              <a href="#how-it-works">How it works</a>
+              <a href="pricing.html">Pricing</a>
+              <a href="create-event.html">Create event</a>
+              <a href="manage-events.html">Manage events</a>
+              <a href="gallery.html">Gallery</a>
+              <a href="guest-upload.html?eventId=test123">Guest upload demo</a>
+            </div>
+          </div>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">
+              Account ▾
+            </button>
+            <div class="nav-menu">
+              <a href="event-admin-login.html">Sign in</a>
+              <a href="create-event.html">Create account</a>
+              <a href="super-admin-login.html">Admin</a>
+            </div>
+          </div>
+        </nav>
+      </header>
 
-    <main class="max-w-6xl mx-auto px-6 pb-20 pt-8">
-      <section class="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
-        <div class="space-y-6">
-          <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-indigo-100">
-            ✨ QR-first photo & video uploads for events
-          </p>
-          <h1 class="text-4xl sm:text-5xl font-bold leading-tight">
-            Gather every guest photo in seconds with a shareable QR code.
+      <section class="hero">
+        <div class="fade-up">
+          <span class="eyebrow">No apps • Just scan & share</span>
+          <h1>
+            Capture every guest memory at your
+            <span class="typed-wrap">
+              <span class="typed" id="typedWord">Event</span>
+              ✨
+            </span>
           </h1>
-          <p class="text-lg text-slate-200">
-            Create a branded upload link, print the QR code, and let guests drop photos & videos instantly—no app download.
+          <p class="subhead">
+            A playful, QR-first upload hub so you never miss a moment — every angle, every pixel,
+            all organized in a live digital album.
           </p>
-          <div class="flex flex-col sm:flex-row gap-4">
-            <a href="create-event.html"
-              class="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-6 py-3 font-semibold shadow hover:bg-indigo-400">
-              ➕ Create a Free Event
-            </a>
-            <a href="manage-events.html"
-              class="inline-flex items-center justify-center rounded-xl border border-white/20 px-6 py-3 font-semibold hover:bg-white/10">
-              📋 Manage My Events
-            </a>
+          <div class="hero-actions">
+            <a class="button primary" href="create-event.html">Start a Free Event</a>
+            <a class="button" href="manage-events.html">Manage My Events</a>
+          </div>
+
+          <div class="metrics">
+            <div class="metric">
+              <strong id="counterMoments">2,400</strong>
+              <span>moments captured so far</span>
+            </div>
+            <div class="metric">
+              <strong id="counterEvents">12</strong>
+              <span>events launched</span>
+            </div>
+            <div class="metric">
+              <strong>No app</strong>
+              <span>needed, just scan and share</span>
+            </div>
           </div>
         </div>
 
-        <div class="bg-white/5 border border-white/10 rounded-3xl p-6 shadow-2xl">
-          <div class="rounded-2xl bg-gradient-to-br from-indigo-500/40 via-sky-400/30 to-emerald-400/30 p-6">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-slate-200">Live Event</p>
-                <h2 class="text-2xl font-semibold">Alex & Hailey Wedding</h2>
-              </div>
-              <span class="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold">QR Ready</span>
-            </div>
-            <div class="mt-6 grid gap-3">
-              <div class="rounded-xl bg-white/10 p-4">
-                <p class="text-xs text-slate-200">Guest Upload Link</p>
-                <p class="mt-2 break-all text-sm text-indigo-100">
-                  event-upload-site.com/guest-upload.html?eventId=EVT-392
-                </p>
-              </div>
-              <div class="rounded-xl bg-white/10 p-4">
-                <p class="text-xs text-slate-200">Upload Status</p>
-                <p class="mt-2 text-sm text-emerald-200">
-                  48 photos • 12 videos • Updated 2 min ago
-                </p>
-              </div>
-            </div>
+        <div class="hero-card fade-up delay-2">
+          <span class="status">Live Uploads</span>
+          <h3 id="liveEventName">Community Meetup</h3>
+          <div class="row" id="liveEventType">Type: Local gathering</div>
+          <div class="row" id="liveEventStats">Uploads: 12 photos • 4 videos • 2 notes</div>
+          <div class="row" id="liveEventUpdate">Photo wall: updated 6 min ago</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title fade-up">Step-by-step flow that guests love</h2>
+        <p class="section-subtitle fade-up delay-1">
+          Friendly for everyone — from techies to grandparents — with zero app downloads.
+        </p>
+        <div class="steps">
+          <div class="step-card fade-up delay-1">
+            <span class="step-badge">Step 1</span>
+            <h4>Create your event</h4>
+            <p class="muted">Name it, set the owner, and generate a unique QR link.</p>
+          </div>
+          <div class="step-card fade-up delay-2">
+            <span class="step-badge">Step 2</span>
+            <h4>Share the QR</h4>
+            <p class="muted">Print it, post it, or text it to guests in seconds.</p>
+          </div>
+          <div class="step-card fade-up delay-3">
+            <span class="step-badge">Step 3</span>
+            <h4>Collect the moments</h4>
+            <p class="muted">Guests upload photos, videos, and notes from any phone.</p>
+          </div>
+          <div class="step-card fade-up delay-3">
+            <span class="step-badge">Step 4</span>
+            <h4>Relive & share</h4>
+            <p class="muted">Download everything or run a live photo wall.</p>
           </div>
         </div>
       </section>
 
-      <section class="mt-16">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-2xl font-semibold">Event hosts love the experience</h2>
-          <a href="guest-upload.html?eventId=test123" class="text-sm text-indigo-200 hover:text-indigo-100">
-            🔎 Try the guest upload page
-          </a>
-        </div>
-
-        <div class="grid gap-6 md:grid-cols-3">
-          <article class="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <div class="flex items-center gap-4">
-              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 to-sky-400 flex items-center justify-center text-lg font-semibold">
-                AR
-              </div>
-              <div>
-                <p class="font-semibold">Alex Reynolds</p>
-                <p class="text-sm text-slate-300">Wedding Host</p>
-              </div>
-            </div>
-            <p class="mt-4 text-sm text-slate-200">
-              “Our guests scanned the QR and uploaded instantly. We had a full gallery before dessert.”
-            </p>
-          </article>
-
-          <article class="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <div class="flex items-center gap-4">
-              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-lg font-semibold">
-                JM
-              </div>
-              <div>
-                <p class="font-semibold">Jordan Miller</p>
-                <p class="text-sm text-slate-300">Corporate Events</p>
-              </div>
-            </div>
-            <p class="mt-4 text-sm text-slate-200">
-              “Setup took five minutes and the QR cards looked premium. Everyone was sharing in real time.”
-            </p>
-          </article>
-
-          <article class="rounded-2xl border border-white/10 bg-white/5 p-6">
-            <div class="flex items-center gap-4">
-              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-pink-400 to-orange-400 flex items-center justify-center text-lg font-semibold">
-                SB
-              </div>
-              <div>
-                <p class="font-semibold">Sophia Brooks</p>
-                <p class="text-sm text-slate-300">Birthday Host</p>
-              </div>
-            </div>
-            <p class="mt-4 text-sm text-slate-200">
-              “My friends loved that it worked right in the browser. We captured every surprise moment.”
-            </p>
-          </article>
+      <section class="section" id="how-it-works">
+        <h2 class="section-title fade-up">How it works (and why it feels magical)</h2>
+        <p class="section-subtitle fade-up delay-1">
+          Built for high-energy events, big memories, and zero missed angles.
+        </p>
+        <div class="how-grid">
+          <div class="how-card fade-up delay-1">
+            <h4>Instant QR access</h4>
+            <p>Guests scan once and upload without logins, apps, or extra screens.</p>
+          </div>
+          <div class="how-card fade-up delay-2">
+            <h4>Live digital album</h4>
+            <p>Every upload lands in a shared album that updates in real time.</p>
+          </div>
+          <div class="how-card fade-up delay-3">
+            <h4>Every angle captured</h4>
+            <p>Friends, family, and teammates become your extended camera crew.</p>
+          </div>
+          <div class="how-card fade-up delay-3">
+            <h4>Download anytime</h4>
+            <p>Grab all files in one click and keep the memories forever.</p>
+          </div>
         </div>
       </section>
-    </main>
+
+      <section class="section">
+        <h2 class="section-title fade-up">Hosts, planners, and teams love it</h2>
+        <p class="section-subtitle fade-up delay-1">Proof that simple beats complicated.</p>
+        <div class="reviews-track">
+          <div class="review-card quote fade-up delay-1">
+            <strong>“We finally got all the candid moments.”</strong>
+            <p>Guests uploaded instantly and the slideshow was buzzing all night.</p>
+            <div class="review-meta">
+              <span>— Sofia, Wedding Host</span>
+              <div class="review-stars" aria-label="5 out of 5 stars">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="review-sep" aria-hidden="true">
+            <svg viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 18c16-10 32-10 48 0s32 10 48 0 32-10 40 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="70" cy="18" r="13" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              <g transform="translate(60 8) rotate(-18 10 10)">
+                <rect x="1.5" y="4" width="17" height="12" rx="2.6" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <circle cx="10" cy="10" r="3.2" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <rect x="5.2" y="1.2" width="5.2" height="3.4" rx="1.1" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              </g>
+            </svg>
+          </div>
+          <div class="review-card quote fade-up delay-2">
+            <strong>“Setup took two minutes.”</strong>
+            <p>Printed the QR cards and the gallery filled up before the first toast.</p>
+            <div class="review-meta">
+              <span>— Marcus, Event Planner</span>
+              <div class="review-stars" aria-label="5 out of 5 stars">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="review-sep" aria-hidden="true">
+            <svg viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 18c16-10 32-10 48 0s32 10 48 0 32-10 40 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="70" cy="18" r="13" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              <g transform="translate(60 8) rotate(-18 10 10)">
+                <rect x="1.5" y="4" width="17" height="12" rx="2.6" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <circle cx="10" cy="10" r="3.2" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <rect x="5.2" y="1.2" width="5.2" height="3.4" rx="1.1" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              </g>
+            </svg>
+          </div>
+          <div class="review-card quote fade-up delay-3">
+            <strong>“Zero friction for guests.”</strong>
+            <p>My dad scanned once and uploaded like a pro. That sold me.</p>
+            <div class="review-meta">
+              <span>— Emma, Bride</span>
+              <div class="review-stars" aria-label="5 out of 5 stars">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="review-sep" aria-hidden="true">
+            <svg viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 18c16-10 32-10 48 0s32 10 48 0 32-10 40 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="70" cy="18" r="13" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              <g transform="translate(60 8) rotate(-18 10 10)">
+                <rect x="1.5" y="4" width="17" height="12" rx="2.6" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <circle cx="10" cy="10" r="3.2" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <rect x="5.2" y="1.2" width="5.2" height="3.4" rx="1.1" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              </g>
+            </svg>
+          </div>
+          <div class="review-card quote">
+            <strong>“Every angle showed up.”</strong>
+            <p>We ended the night with a full gallery from guests’ phones.</p>
+            <div class="review-meta">
+              <span>— Liam, Groom</span>
+              <div class="review-stars" aria-label="5 out of 5 stars">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="review-sep" aria-hidden="true">
+            <svg viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 18c16-10 32-10 48 0s32 10 48 0 32-10 40 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="70" cy="18" r="13" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              <g transform="translate(60 8) rotate(-18 10 10)">
+                <rect x="1.5" y="4" width="17" height="12" rx="2.6" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <circle cx="10" cy="10" r="3.2" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <rect x="5.2" y="1.2" width="5.2" height="3.4" rx="1.1" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              </g>
+            </svg>
+          </div>
+          <div class="review-card quote">
+            <strong>“Our reunion felt complete.”</strong>
+            <p>So many nostalgic shots we would’ve missed otherwise.</p>
+            <div class="review-meta">
+              <span>— Olivia, Reunion Host</span>
+              <div class="review-stars" aria-label="5 out of 5 stars">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="review-sep" aria-hidden="true">
+            <svg viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 18c16-10 32-10 48 0s32 10 48 0 32-10 40 0" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="70" cy="18" r="13" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              <g transform="translate(60 8) rotate(-18 10 10)">
+                <rect x="1.5" y="4" width="17" height="12" rx="2.6" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <circle cx="10" cy="10" r="3.2" stroke="currentColor" stroke-width="2.4" fill="none"/>
+                <rect x="5.2" y="1.2" width="5.2" height="3.4" rx="1.1" stroke="currentColor" stroke-width="2.4" fill="none"/>
+              </g>
+            </svg>
+          </div>
+          <div class="review-card quote">
+            <strong>“People kept scanning all night.”</strong>
+            <p>The QR signs were a hit. Super easy to explain.</p>
+            <div class="review-meta">
+              <span>— Noah, Party Host</span>
+              <div class="review-stars" aria-label="5 out of 5 stars">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.75l2.86 5.8 6.4.93-4.63 4.51 1.1 6.38L12 17.9l-5.73 3.01 1.1-6.38L2.74 9.48l6.4-.93L12 2.75z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="counter-band fade-up">
+          <div>
+            <div class="counter" id="counterMomentsBand">2,400+</div>
+            moments shared and still counting
+          </div>
+          <div>
+            <div class="counter" id="counterEventsBand">12+</div>
+            events powered worldwide
+          </div>
+          <div>
+            <div class="counter">100%</div>
+            browser-based, no downloads
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="cta fade-up">
+          <div>
+            <h2 style="margin: 0 0 8px; font-family: 'Fraunces', serif;">Ready to capture every memory?</h2>
+            <p style="margin: 0; opacity: 0.92;">Create your event and share the QR in under 2 minutes.</p>
+          </div>
+          <div style="text-align: right;">
+            <a class="button" style="background: #fff; color: #1b1b1f;" href="guest-upload.html?eventId=test123">Try Guest Upload</a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="footer-links">
+          <a href="create-event.html">Create Event</a>
+          <a href="manage-events.html">Manage Events</a>
+          <a href="super-admin-login.html">Admin</a>
+        </div>
+      </footer>
+    </div>
   </div>
 
-  <footer class="border-t border-white/10 bg-slate-950/70">
-    <div class="max-w-6xl mx-auto px-6 py-10 text-sm text-slate-400 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <p>Built with ❤️ using Cloudflare Workers, R2, and D1.</p>
-      <div class="flex gap-4">
-        <a href="create-event.html" class="hover:text-white">Create Event</a>
-        <a href="manage-events.html" class="hover:text-white">Manage Events</a>
-        <a href="super-admin-login.html" class="hover:text-white">Admin</a>
-      </div>
-    </div>
-  </footer>
+  <script>
+const svgDefs = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+svgDefs.setAttribute("width", "0");
+svgDefs.setAttribute("height", "0");
+svgDefs.innerHTML = "<defs><linearGradient id='starGradient' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='#ffd166'/><stop offset='100%' stop-color='#ff8fab'/></linearGradient></defs>";
+document.body.appendChild(svgDefs);
+
+const typedWords = ["Event", "Wedding", "Birthday", "Party", "Conference", "Meetup", "Festival", "Reunion"];
+let typedIndex = 0;
+let typedChar = 0;
+let deleting = false;
+const typedEl = document.getElementById("typedWord");
+
+function typeLoop() {
+  const word = typedWords[typedIndex];
+  if (!deleting) {
+    typedChar += 1;
+    if (typedChar >= word.length) {
+      deleting = true;
+      setTimeout(typeLoop, 1400);
+      typedEl.textContent = word;
+      return;
+    }
+  } else {
+    typedChar -= 1;
+    if (typedChar <= 0) {
+      deleting = false;
+      typedIndex = (typedIndex + 1) % typedWords.length;
+    }
+  }
+  typedEl.textContent = word.slice(0, typedChar);
+  setTimeout(typeLoop, deleting ? 60 : 90);
+}
+typeLoop();
+
+function animateCounter(el, target) {
+  const start = Math.max(0, target - 120000);
+  const duration = 1500;
+  const startTime = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - startTime) / duration, 1);
+    const value = Math.floor(start + (target - start) * progress);
+    el.textContent = value.toLocaleString();
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+const moments = 2400;
+const events = 12;
+animateCounter(document.getElementById("counterMoments"), moments);
+animateCounter(document.getElementById("counterEvents"), events);
+document.getElementById("counterMomentsBand").textContent = moments.toLocaleString() + "+";
+document.getElementById("counterEventsBand").textContent = events.toLocaleString() + "+";
+
+const liveEvents = [
+  { name: "Ava & Eli Wedding", type: "Wedding celebration", stats: "Uploads: 28 photos • 9 videos • 6 notes", update: "Photo wall: updated 4 min ago" },
+  { name: "Maya's 30th Birthday", type: "Birthday party", stats: "Uploads: 19 photos • 3 videos • 4 notes", update: "Photo wall: updated 7 min ago" },
+  { name: "Hillside Community Meetup", type: "Community meetup", stats: "Uploads: 14 photos • 2 videos • 1 note", update: "Photo wall: updated 10 min ago" },
+  { name: "Riverfront Food Fest", type: "Festival", stats: "Uploads: 31 photos • 6 videos • 5 notes", update: "Photo wall: updated 3 min ago" },
+  { name: "Nimbus Offsite", type: "Company offsite", stats: "Uploads: 22 photos • 5 videos • 3 notes", update: "Photo wall: updated 8 min ago" },
+  { name: "Studio Launch Night", type: "Brand launch", stats: "Uploads: 16 photos • 4 videos • 2 notes", update: "Photo wall: updated 12 min ago" }
+];
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+let liveQueue = shuffle([...liveEvents]);
+function rotateLiveEvent() {
+  if (liveQueue.length === 0) liveQueue = shuffle([...liveEvents]);
+  const next = liveQueue.shift();
+  document.getElementById("liveEventName").textContent = next.name;
+  document.getElementById("liveEventType").textContent = "Type: " + next.type;
+  document.getElementById("liveEventStats").textContent = next.stats;
+  document.getElementById("liveEventUpdate").textContent = next.update;
+}
+
+rotateLiveEvent();
+setInterval(rotateLiveEvent, 6000);
+  </script>
 </body>
 </html>

@@ -1,36 +1,240 @@
 <!DOCTYPE html>
-<html lang="en" class="bg-slate-950 text-white">
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Event Admin Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event Admin Dashboard • Kachow</title>
+  <meta name="description" content="Manage event uploads and download files." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #fff7f1;
+      --ink: #1b1b1f;
+      --muted: #5c5d69;
+      --brand: #ff6b6b;
+      --brand-2: #5bc0eb;
+      --brand-3: #ffd166;
+      --brand-4: #9b5de5;
+      --card: #ffffff;
+      --line: #f0e5dc;
+      --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
+      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
+        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
+        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
+        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 26px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-mark svg {
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-text {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 14px;
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+      cursor: pointer;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--brand), #ff8f8f);
+      color: #fff;
+    }
+
+    .button.secondary {
+      background: linear-gradient(135deg, var(--brand-2), #7bd3f4);
+      color: #0b1220;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(22, 20, 32, 0.15);
+    }
+
+    h1 {
+      font-family: "Fraunces", serif;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      margin: 0;
+    }
+
+    .subhead {
+      color: var(--muted);
+      margin: 6px 0 0;
+    }
+
+    .grid {
+      margin-top: 18px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      display: grid;
+      gap: 10px;
+    }
+
+    .card-media {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      background: #f6efe7;
+    }
+
+    .card-body {
+      padding: 14px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .card-link {
+      display: inline-flex;
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: #0b5b7a;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .card-link:hover {
+      text-decoration: underline;
+    }
+
+    .notice {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(255, 107, 107, 0.35);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--muted);
+    }
+
+    @media (max-width: 720px) {
+      header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
+  </style>
 </head>
+<body>
+  <div class="page">
+    <div class="container">
+      <header>
+        <a class="logo" href="index.html">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
+                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
+                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
+                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
+                <circle cx="122" cy="34" r="4" fill="#203040"/>
+                <circle cx="70" cy="70" r="30" fill="#203040"/>
+                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
+                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
+                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
+                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
+                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
+                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
+              </g>
+            </svg>
+          </span>
+          <span class="logo-text">KACHOW</span>
+        </a>
+        <div class="toolbar">
+          <a class="button secondary" href="index.html">Home</a>
+          <button class="button secondary" onclick="downloadZip()">Download ZIP</button>
+          <button class="button primary" onclick="logout()">Logout</button>
+        </div>
+      </header>
 
-<body class="min-h-screen">
-  <div class="relative isolate overflow-hidden min-h-screen">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(129,140,248,0.2),_transparent_60%)]"></div>
-    <div class="absolute inset-y-0 right-0 -z-10 w-1/2 bg-[radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.18),_transparent_60%)]"></div>
+      <section>
+        <h1 id="eventTitle">Event Admin</h1>
+        <p class="subhead">Manage uploads and download files.</p>
+      </section>
 
-    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-      <div>
-        <p class="text-sm uppercase tracking-wide text-slate-300">Event Admin</p>
-        <h1 id="eventTitle" class="text-3xl font-semibold"></h1>
-      </div>
-      <div class="flex gap-3">
-        <button onclick="downloadZip()"
-          class="rounded-xl bg-emerald-500/90 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-500">
-          Download ZIP
-        </button>
-        <button onclick="logout()"
-          class="rounded-xl bg-rose-500/80 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-500">
-          Logout
-        </button>
-      </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-6 pb-16">
-      <div id="filesGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
-    </main>
+      <main class="grid" id="filesGrid"></main>
+    </div>
   </div>
 
 <script>
@@ -46,29 +250,12 @@ if (!eventId || !storedEventId || storedEventId !== eventId || !email || !passwo
   location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
 }
 
-document.getElementById("eventTitle").textContent = `Event ${eventId}`;
-
-async function loadFiles() {
-  const grid = document.getElementById("filesGrid");
-  grid.innerHTML = `
-    <div class="col-span-full rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-slate-300">
-      Loading uploads...
-    </div>
-  `;
-
-const storedEventId = localStorage.getItem("adminEventId");
-const email = localStorage.getItem("adminEmail");
-const password = localStorage.getItem("adminPassword");
-
-if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
-  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
-}
-
 document.getElementById("eventTitle").textContent = `Event Admin: ${eventId}`;
 
 async function loadFiles() {
   const grid = document.getElementById("filesGrid");
-  grid.innerHTML = "Loading...";
+  grid.innerHTML = "";
+  grid.appendChild(buildNotice("Loading uploads..."));
 
   try {
     const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
@@ -79,49 +266,74 @@ async function loadFiles() {
     const data = await res.json();
 
     if (!res.ok) {
-      grid.innerHTML = `<p class="text-rose-400">${data.error || "Failed to load files."}</p>`;
-      grid.innerHTML = `<p class="text-red-500">${data.error || "Failed to load files."}</p>`;
+      grid.innerHTML = "";
+      grid.appendChild(buildNotice(data.error || "Failed to load files."));
       return;
     }
 
     grid.innerHTML = "";
+    if (!data.files || data.files.length === 0) {
+      grid.appendChild(buildNotice("No uploads yet."));
+      return;
+    }
 
     data.files.forEach(file => {
-      const url = `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
-      const ext = file.name.toLowerCase();
-      const isImage = ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp");
-
-      const preview = isImage
-        ? `<img src="${url}" class="h-48 w-full object-cover" alt="${file.name}">`
-        : `<video src="${url}" class="h-48 w-full object-cover" controls></video>`;
-
-      grid.innerHTML += `
-        <div class="rounded-2xl overflow-hidden border border-white/10 bg-slate-900/70">
-          ${preview}
-          <div class="p-4">
-            <p class="text-sm font-medium text-white truncate">${file.name}</p>
-            <a href="${url}" download class="mt-2 inline-flex text-sm text-indigo-300 hover:text-indigo-200">Download file</a>
-          </div>
-
-      let preview = "";
-      if (ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp")) {
-        preview = `<img src="${url}" class="rounded-lg shadow">`;
-      } else {
-        preview = `<video src="${url}" class="rounded-lg shadow" controls></video>`;
-      }
-
-      grid.innerHTML += `
-        <div class="p-2 border rounded-xl">
-          ${preview}
-          <a href="${url}" download class="block mt-2 text-indigo-600 underline">Download</a>
-        </div>
-      `;
+      grid.appendChild(buildFileCard(file));
     });
   } catch (error) {
     console.error(error);
-    grid.innerHTML = `<p class="text-rose-400">Network error. Please try again.</p>`;
-    grid.innerHTML = `<p class="text-red-500">Network error. Please try again.</p>`;
+    grid.innerHTML = "";
+    grid.appendChild(buildNotice("Network error. Please try again."));
   }
+}
+
+function buildNotice(text) {
+  const card = document.createElement("div");
+  card.className = "notice";
+  card.textContent = text;
+  return card;
+}
+
+function buildFileCard(file) {
+  const url = `${API_BASE}/media?eventId=${encodeURIComponent(eventId)}&file=${encodeURIComponent(file.name)}`;
+  const ext = file.name.toLowerCase();
+  const isImage = ext.endsWith(".jpg") || ext.endsWith(".jpeg") || ext.endsWith(".png") || ext.endsWith(".webp");
+
+  const card = document.createElement("div");
+  card.className = "card";
+
+  if (isImage) {
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = file.name;
+    img.className = "card-media";
+    card.appendChild(img);
+  } else {
+    const video = document.createElement("video");
+    video.src = url;
+    video.controls = true;
+    video.className = "card-media";
+    card.appendChild(video);
+  }
+
+  const body = document.createElement("div");
+  body.className = "card-body";
+
+  const title = document.createElement("p");
+  title.className = "card-title";
+  title.textContent = file.name;
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "";
+  link.className = "card-link";
+  link.textContent = "Download file";
+
+  body.appendChild(title);
+  body.appendChild(link);
+  card.appendChild(body);
+
+  return card;
 }
 
 function downloadZip() {

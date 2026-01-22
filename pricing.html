@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pricing • Kachow</title>
+  <meta name="description" content="Simple, honest pricing for QR-first event photo sharing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #fff7f1;
+      --ink: #1b1b1f;
+      --muted: #5c5d69;
+      --brand: #ff6b6b;
+      --brand-2: #5bc0eb;
+      --brand-3: #ffd166;
+      --brand-4: #9b5de5;
+      --card: #ffffff;
+      --line: #f0e5dc;
+      --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
+      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      background:
+        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
+        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
+        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
+        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
+    }
+
+    .container {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 26px;
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 0;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-mark svg {
+      width: 64px;
+      height: 50px;
+    }
+
+    .logo-text {
+      font-family: "Fraunces", serif;
+      font-size: 1.25rem;
+      letter-spacing: 0.08em;
+    }
+
+    nav {
+      display: inline-flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .nav-group {
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .nav-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .nav-trigger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 20px rgba(22, 20, 32, 0.12);
+    }
+
+    .nav-menu {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      margin-top: 6px;
+      min-width: 200px;
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      padding: 10px;
+      display: none;
+      z-index: 5;
+    }
+
+    .nav-group:hover .nav-menu,
+    .nav-group:focus-within .nav-menu,
+    .nav-menu:hover {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav-menu a {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      transition: background 0.2s var(--ease);
+    }
+
+    .nav-menu a:hover {
+      background: rgba(255, 214, 184, 0.5);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 107, 107, 0.14);
+      color: #b83b3b;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    h1 {
+      font-family: "Fraunces", "Times New Roman", serif;
+      font-size: clamp(2.2rem, 3.4vw, 3.2rem);
+      line-height: 1.1;
+      margin: 14px 0 10px;
+    }
+
+    .subhead {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin: 0;
+      max-width: 560px;
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255, 107, 107, 0.35);
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .pricing-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      margin-top: 26px;
+    }
+
+    .plan {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      display: grid;
+      gap: 12px;
+    }
+
+    .plan.popular {
+      border: 2px solid rgba(255, 107, 107, 0.5);
+      box-shadow: var(--shadow);
+    }
+
+    .badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 107, 107, 0.15);
+      color: #b83b3b;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .price {
+      font-family: "Fraunces", serif;
+      font-size: 2.2rem;
+    }
+
+    .price small {
+      font-size: 1rem;
+      color: var(--muted);
+      font-family: "Nunito", sans-serif;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    li { margin: 6px 0; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 0;
+      background: #fff;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 700;
+      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
+      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--brand), #ff8f8f);
+      color: #fff;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(22, 20, 32, 0.15);
+    }
+
+    .faq {
+      margin-top: 38px;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .faq-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid var(--line);
+    }
+
+    .compare {
+      margin-top: 38px;
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    .compare-table th,
+    .compare-table td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    .compare-table th {
+      font-weight: 700;
+      color: var(--ink);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: #fff7f1;
+    }
+
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    .pill.yes {
+      background: rgba(91, 192, 235, 0.2);
+      color: #0b5b7a;
+    }
+
+    .pill.no {
+      background: rgba(255, 107, 107, 0.15);
+      color: #b83b3b;
+    }
+
+    .compare-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    footer {
+      padding: 26px 0 40px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      font-size: 0.9rem;
+      margin-top: 40px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: var(--ink);
+    }
+
+    @media (max-width: 720px) {
+      header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+      <header>
+        <a class="logo" href="index.html">
+          <span class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
+                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
+                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
+                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
+                <circle cx="122" cy="34" r="4" fill="#203040"/>
+                <circle cx="70" cy="70" r="30" fill="#203040"/>
+                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
+                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
+                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
+                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
+                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
+                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
+              </g>
+            </svg>
+          </span>
+          <span class="logo-text">KACHOW</span>
+        </a>
+        <nav>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Explore ▾</button>
+            <div class="nav-menu">
+              <a href="index.html#how-it-works">How it works</a>
+              <a href="pricing.html">Pricing</a>
+              <a href="create-event.html">Create event</a>
+              <a href="manage-events.html">Manage events</a>
+              <a href="gallery.html">Gallery</a>
+            </div>
+          </div>
+          <div class="nav-group">
+            <button class="nav-trigger" type="button">Account ▾</button>
+            <div class="nav-menu">
+              <a href="event-admin-login.html">Sign in</a>
+              <a href="create-event.html">Create account</a>
+              <a href="super-admin-login.html">Admin</a>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <section>
+        <span class="eyebrow">Simple pricing</span>
+        <h1>Pick the plan that fits your event.</h1>
+        <p class="subhead">Start free, upgrade when you need more storage and longer retention.</p>
+        <div class="notice">Money‑back friendly: if your event is canceled, we’ll help you reschedule or refund.</div>
+      </section>
+
+      <section class="pricing-grid">
+        <div class="plan">
+          <h3>Free</h3>
+          <div class="price">$0 <small>/ event</small></div>
+          <p class="subhead">Perfect for small gatherings and quick moments.</p>
+          <ul>
+            <li>Up to 100 uploads</li>
+            <li>Unlimited guests</li>
+            <li>QR code + share link</li>
+            <li>7‑day storage</li>
+            <li>Simple event cover</li>
+          </ul>
+          <a class="button" href="create-event.html">Create Free Event</a>
+        </div>
+
+        <div class="plan popular">
+          <span class="badge">Most Popular</span>
+          <h3>Plus</h3>
+          <div class="price">$29 <small>/ event</small></div>
+          <p class="subhead">Best for weddings and mid‑size celebrations.</p>
+          <ul>
+            <li>Up to 500 uploads</li>
+            <li>Unlimited guests</li>
+            <li>30‑day storage</li>
+            <li>Custom cover image</li>
+            <li>Bulk download</li>
+          </ul>
+          <a class="button primary" href="create-event.html">Choose Plus</a>
+        </div>
+
+        <div class="plan">
+          <h3>Pro</h3>
+          <div class="price">$79 <small>/ event</small></div>
+          <p class="subhead">For large events, conferences, and teams.</p>
+          <ul>
+            <li>Unlimited uploads</li>
+            <li>Unlimited guests</li>
+            <li>1‑year storage</li>
+            <li>Extended retention</li>
+            <li>Moderation tools</li>
+          </ul>
+          <a class="button" href="create-event.html">Choose Pro</a>
+        </div>
+      </section>
+
+      <section class="compare">
+        <h2 style="margin: 0 0 6px; font-family: 'Fraunces', serif;">Feature comparison</h2>
+        <p class="subhead" style="margin-bottom: 16px;">See how our experience stacks up against typical alternatives.</p>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Kachow</th>
+              <th>Typical alternatives</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Guest uploads without an app</td>
+              <td><span class="pill yes">Yes</span></td>
+              <td><span class="pill no">Often no</span></td>
+            </tr>
+            <tr>
+              <td>QR code access</td>
+              <td><span class="pill yes">Included</span></td>
+              <td><span class="pill no">Limited</span></td>
+            </tr>
+            <tr>
+              <td>Live album updates</td>
+              <td><span class="pill yes">Real‑time</span></td>
+              <td><span class="pill no">Delayed</span></td>
+            </tr>
+            <tr>
+              <td>Bulk download</td>
+              <td><span class="pill yes">One click</span></td>
+              <td><span class="pill no">Manual</span></td>
+            </tr>
+            <tr>
+              <td>Guest notes & captions</td>
+              <td><span class="pill yes">Included</span></td>
+              <td><span class="pill no">Rare</span></td>
+            </tr>
+            <tr>
+              <td>Moderation tools</td>
+              <td><span class="pill yes">Available</span></td>
+              <td><span class="pill no">Limited</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="compare-note">No competitor names — just a transparent look at the experience guests actually get.</div>
+      </section>
+
+      <section class="faq">
+        <div class="faq-card">
+          <strong>Can I switch plans later?</strong>
+          <p class="subhead">Yes, you can upgrade any time before or during your event.</p>
+        </div>
+        <div class="faq-card">
+          <strong>Do guests need an app?</strong>
+          <p class="subhead">Nope. They just scan the QR and upload from their browser.</p>
+        </div>
+        <div class="faq-card">
+          <strong>Do you offer refunds?</strong>
+          <p class="subhead">If your event is canceled, we’ll work with you to refund or reschedule.</p>
+        </div>
+      </section>
+
+      <footer>
+        <div class="footer-links">
+          <a href="index.html">Home</a>
+          <a href="create-event.html">Create Event</a>
+          <a href="manage-events.html">Manage Events</a>
+          <a href="super-admin-login.html">Admin</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
