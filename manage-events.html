@@ -216,6 +216,30 @@
       outline: none;
     }
 
+    input[type="date"] {
+      background:
+        linear-gradient(180deg, #fffaf4 0%, #fff4ea 100%);
+      border: 1px solid #f1d3c7;
+      box-shadow: 0 10px 22px rgba(22, 20, 32, 0.08);
+      padding-right: 44px;
+    }
+
+    input[type="date"]:focus {
+      border-color: rgba(255, 107, 107, 0.6);
+      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.18);
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.75;
+      filter: hue-rotate(-10deg) saturate(1.1);
+    }
+
+    input[type="date"]::-webkit-datetime-edit {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
     .button {
       display: inline-flex;
       align-items: center;
