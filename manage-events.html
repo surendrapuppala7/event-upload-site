@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Manage Events • Kachow</title>
+  <title>My Events • Kachow</title>
   <meta name="description" content="View and manage your Kachow events." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -57,6 +57,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 24px 0;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .logo {
@@ -95,6 +97,16 @@
     }
 
     .nav-group { position: relative; padding-bottom: 10px; }
+
+    .nav-group::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: 10px;
+    }
+
     .nav-trigger {
       display: inline-flex;
       align-items: center;
@@ -113,6 +125,7 @@
       transform: translateY(-1px);
       box-shadow: 0 12px 20px rgba(22, 20, 32, 0.12);
     }
+
     .nav-menu {
       position: absolute;
       right: 0;
@@ -124,15 +137,25 @@
       border: 1px solid var(--line);
       box-shadow: var(--shadow-soft);
       padding: 10px;
-      display: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      pointer-events: none;
       z-index: 5;
+      transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
     }
+
     .nav-group:hover .nav-menu,
     .nav-group:focus-within .nav-menu,
-    .nav-menu:hover {
+    .nav-group.open .nav-menu {
       display: grid;
       gap: 6px;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
     }
+
     .nav-menu a {
       text-decoration: none;
       color: var(--ink);
@@ -163,7 +186,10 @@
       padding: 24px;
       border: 1px solid var(--line);
       box-shadow: var(--shadow-soft);
-      max-width: 560px;
+    }
+
+    .panel + .panel {
+      margin-top: 18px;
     }
 
     label {
@@ -216,6 +242,11 @@
       color: #0b1220;
     }
 
+    .button.ghost {
+      background: rgba(255, 214, 184, 0.6);
+      color: #1b1b1f;
+    }
+
     .button:hover {
       transform: translateY(-2px);
       box-shadow: 0 14px 24px rgba(22, 20, 32, 0.15);
@@ -226,7 +257,11 @@
       text-align: center;
       font-size: 0.92rem;
       color: var(--muted);
+      font-weight: 700;
     }
+
+    .status.ok { color: #0d6e52; }
+    .status.err { color: #b42318; }
 
     .grid {
       margin-top: 24px;
@@ -242,6 +277,8 @@
       border: 1px solid var(--line);
       box-shadow: var(--shadow-soft);
       transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+      display: grid;
+      gap: 10px;
     }
 
     .card:hover {
@@ -256,20 +293,36 @@
     }
 
     .card-meta {
-      margin: 6px 0 0;
+      margin: 0;
       color: var(--muted);
       font-size: 0.9rem;
     }
 
-    .card-meta.small {
-      font-size: 0.8rem;
+    .card-actions {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
     }
 
-    .card-actions {
-      margin-top: 14px;
+    .stack {
       display: grid;
-      gap: 10px;
+      gap: 18px;
     }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255, 107, 107, 0.12);
+      color: var(--brand);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .hidden { display: none; }
 
     @media (max-width: 720px) {
       header { flex-direction: column; align-items: flex-start; gap: 14px; }
@@ -307,90 +360,201 @@
             <div class="nav-menu">
               <a href="index.html#how-it-works">How it works</a>
               <a href="pricing.html">Pricing</a>
-              <a href="create-event.html">Create event</a>
-              <a href="manage-events.html">Manage events</a>
-              <a href="gallery.html">Gallery</a>
+              <a href="manage-events.html">My events</a>
+              <a href="guest-upload.html?eventId=test123">Guest upload demo</a>
             </div>
           </div>
           <div class="nav-group">
             <button class="nav-trigger" type="button">Account ▾</button>
             <div class="nav-menu">
               <a href="event-admin-login.html">Sign in</a>
-              <a href="create-event.html">Create account</a>
-              <a href="super-admin-login.html">Admin</a>
+              <a href="manage-events.html">My events</a>
             </div>
           </div>
         </nav>
       </header>
 
-      <main>
+      <main class="stack">
         <section>
-          <h1>Manage your events</h1>
-          <p class="subhead">Enter your email to view the events you have created.</p>
+          <span class="tag">My Events</span>
+          <h1>Your Kachow dashboard</h1>
+          <p id="userStatus" class="subhead">Checking your session…</p>
         </section>
 
-        <section class="panel" style="margin-top: 18px;">
-          <label for="ownerEmail">Owner email</label>
-          <input id="ownerEmail" type="email" required placeholder="you@email.com" />
-          <button id="loadButton" class="button primary" style="margin-top: 14px; width: 100%;">Load events</button>
-          <p id="status" class="status" aria-live="polite"></p>
+        <section id="signedOut" class="panel hidden">
+          <h2 style="margin: 0 0 6px; font-family: 'Fraunces', serif;">Sign in to continue</h2>
+          <p class="subhead">Use your Google account to manage events and galleries.</p>
+          <button id="signInBtn" class="button primary" style="margin-top: 14px;">Continue with Google</button>
         </section>
 
-        <section class="grid" id="eventsGrid"></section>
+        <section id="signedIn" class="panel hidden">
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+            <div>
+              <h2 style="margin: 0; font-family: 'Fraunces', serif;">Create your event</h2>
+              <p class="subhead" style="margin: 4px 0 0;">One free event per account. Your code is short and easy to share.</p>
+            </div>
+            <button id="signOutBtn" class="button ghost">Sign out</button>
+          </div>
+          <div style="margin-top: 16px;">
+            <label for="eventName">Event name</label>
+            <input id="eventName" type="text" maxlength="120" placeholder="e.g. Sofia's Birthday" />
+            <button id="createBtn" class="button primary" style="margin-top: 14px; width: 100%;">Create event</button>
+            <p id="createStatus" class="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section>
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <h2 style="margin: 0; font-family: 'Fraunces', serif;">Your events</h2>
+            <button id="refreshBtn" class="button secondary">Refresh</button>
+          </div>
+          <div id="eventsGrid" class="grid"></div>
+        </section>
       </main>
     </div>
   </div>
 
 <script>
 const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+const userStatus = document.getElementById("userStatus");
+const signedOut = document.getElementById("signedOut");
+const signedIn = document.getElementById("signedIn");
+const eventsGrid = document.getElementById("eventsGrid");
+const createStatus = document.getElementById("createStatus");
 
-document.getElementById("loadButton").addEventListener("click", loadEvents);
+const signInBtn = document.getElementById("signInBtn");
+const signOutBtn = document.getElementById("signOutBtn");
+const refreshBtn = document.getElementById("refreshBtn");
+const createBtn = document.getElementById("createBtn");
 
-async function loadEvents() {
-  const emailInput = document.getElementById("ownerEmail");
-  const status = document.getElementById("status");
-  const grid = document.getElementById("eventsGrid");
-  const button = document.getElementById("loadButton");
+signInBtn.addEventListener("click", () => {
+  window.location.href = `${API_BASE}/oauth/user/start`;
+});
 
-  const email = emailInput.value.trim();
-  if (!email) {
-    status.textContent = "Please enter your email.";
-    return;
-  }
+signOutBtn.addEventListener("click", () => logout());
+refreshBtn.addEventListener("click", () => loadEvents());
+createBtn.addEventListener("click", () => createEvent());
 
-  status.textContent = "Loading events…";
-  grid.innerHTML = "";
-  button.disabled = true;
+function setStatus(el, msg, type) {
+  el.textContent = msg || "";
+  el.classList.remove("ok", "err");
+  if (type === "ok") el.classList.add("ok");
+  if (type === "err") el.classList.add("err");
+}
+
+async function bootstrap() {
+  userStatus.textContent = "Checking your session…";
+  signedOut.classList.add("hidden");
+  signedIn.classList.add("hidden");
 
   try {
-    const res = await fetch(
-      `${API_BASE}/api/list-events?owner=${encodeURIComponent(email)}`
-    );
-
+    const res = await fetch(`${API_BASE}/api/user/me`, { credentials: "include" });
     if (!res.ok) {
-      status.textContent = "Error loading events.";
+      showSignedOut();
       return;
     }
 
     const data = await res.json();
-    const events = Array.isArray(data.events) ? data.events : [];
+    userStatus.textContent = `Signed in as ${data.email}`;
+    signedIn.classList.remove("hidden");
+    await loadEvents();
+  } catch (err) {
+    console.error(err);
+    showSignedOut();
+  }
+}
 
-    if (events.length === 0) {
-      status.textContent = "No events found for this email.";
+function showSignedOut() {
+  userStatus.textContent = "Sign in to see your events.";
+  signedOut.classList.remove("hidden");
+  signedIn.classList.add("hidden");
+  eventsGrid.innerHTML = "";
+}
+
+async function loadEvents() {
+  eventsGrid.innerHTML = "";
+  eventsGrid.appendChild(buildNotice("Loading your events…"));
+
+  try {
+    const res = await fetch(`${API_BASE}/api/user/events`, { credentials: "include" });
+    if (res.status === 401) {
+      showSignedOut();
       return;
     }
 
-    status.textContent = "";
-
-    for (const ev of events) {
-      grid.appendChild(buildEventCard(ev));
+    const data = await res.json();
+    if (!res.ok) {
+      eventsGrid.innerHTML = "";
+      eventsGrid.appendChild(buildNotice(data.error || "Unable to load events."));
+      return;
     }
+
+    const events = Array.isArray(data.events) ? data.events : [];
+    eventsGrid.innerHTML = "";
+
+    if (!events.length) {
+      eventsGrid.appendChild(buildNotice("No events yet. Create your first one above."));
+      return;
+    }
+
+    events.forEach((ev) => eventsGrid.appendChild(buildEventCard(ev)));
   } catch (err) {
     console.error(err);
-    status.textContent = "Network error. Please try again.";
-  } finally {
-    button.disabled = false;
+    eventsGrid.innerHTML = "";
+    eventsGrid.appendChild(buildNotice("Network error. Please try again."));
   }
+}
+
+async function createEvent() {
+  const name = document.getElementById("eventName").value.trim();
+  if (!name) {
+    setStatus(createStatus, "Please enter an event name.", "err");
+    return;
+  }
+
+  setStatus(createStatus, "Creating your event…");
+  createBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/user/create-event`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401) {
+      showSignedOut();
+      return;
+    }
+
+    if (!res.ok) {
+      if (data.error === "free_limit_reached") {
+        setStatus(createStatus, "You have already used your free event.", "err");
+      } else {
+        setStatus(createStatus, "Could not create event. Try again.", "err");
+      }
+      return;
+    }
+
+    setStatus(createStatus, "Event created! Scroll down to open it.", "ok");
+    document.getElementById("eventName").value = "";
+    await loadEvents();
+  } catch (err) {
+    console.error(err);
+    setStatus(createStatus, "Network error. Please try again.", "err");
+  } finally {
+    createBtn.disabled = false;
+  }
+}
+
+function buildNotice(text) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.textContent = text;
+  return card;
 }
 
 function buildEventCard(ev) {
@@ -401,12 +565,12 @@ function buildEventCard(ev) {
   title.className = "card-title";
   title.textContent = ev.name || "Untitled Event";
 
-  const meta = document.createElement("p");
-  meta.className = "card-meta";
-  meta.textContent = `Event ID: ${ev.id}`;
+  const code = document.createElement("p");
+  code.className = "card-meta";
+  code.textContent = `Event code: ${ev.id}`;
 
   const created = document.createElement("p");
-  created.className = "card-meta small";
+  created.className = "card-meta";
   created.textContent = `Created: ${ev.created_at}`;
 
   const actions = document.createElement("div");
@@ -417,21 +581,55 @@ function buildEventCard(ev) {
   uploadLink.className = "button secondary";
   uploadLink.textContent = "Open guest upload";
 
-  const adminLink = document.createElement("a");
-  adminLink.href = `/event-admin-login.html?eventId=${encodeURIComponent(ev.id)}`;
-  adminLink.className = "button primary";
-  adminLink.textContent = "Admin login";
+  const galleryLink = document.createElement("a");
+  galleryLink.href = `/gallery.html?eventId=${encodeURIComponent(ev.id)}`;
+  galleryLink.className = "button primary";
+  galleryLink.textContent = "Open gallery";
 
   actions.appendChild(uploadLink);
-  actions.appendChild(adminLink);
+  actions.appendChild(galleryLink);
 
   card.appendChild(title);
-  card.appendChild(meta);
+  card.appendChild(code);
   card.appendChild(created);
   card.appendChild(actions);
 
   return card;
 }
+
+async function logout() {
+  await fetch(`${API_BASE}/api/user/logout`, {
+    method: "POST",
+    credentials: "include"
+  });
+  showSignedOut();
+}
+
+const navGroups = Array.from(document.querySelectorAll(".nav-group"));
+navGroups.forEach((group) => {
+  const trigger = group.querySelector(".nav-trigger");
+  if (!trigger) return;
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    const isOpen = group.classList.contains("open");
+    navGroups.forEach((g) => g.classList.remove("open"));
+    if (!isOpen) group.classList.add("open");
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".nav-group")) {
+    navGroups.forEach((g) => g.classList.remove("open"));
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    navGroups.forEach((g) => g.classList.remove("open"));
+  }
+});
+
+bootstrap();
 </script>
 </body>
 </html>

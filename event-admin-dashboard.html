@@ -242,12 +242,8 @@ const params = new URLSearchParams(location.search);
 const eventId = params.get("eventId");
 const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
 
-const storedEventId = localStorage.getItem("adminEventId");
-const email = localStorage.getItem("adminEmail");
-const password = localStorage.getItem("adminPassword");
-
-if (!eventId || !storedEventId || storedEventId !== eventId || !email || !password) {
-  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId || "");
+if (!eventId) {
+  location.href = "/manage-events.html";
 }
 
 document.getElementById("eventTitle").textContent = `Event Admin: ${eventId}`;
@@ -261,10 +257,15 @@ async function loadFiles() {
     const res = await fetch(`${API_BASE}/api/event-admin/list-files`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId, email, password })
+      credentials: "include",
+      body: JSON.stringify({ eventId })
     });
     const data = await res.json();
 
+    if (res.status === 401) {
+      location.href = "/event-admin-login.html";
+      return;
+    }
     if (!res.ok) {
       grid.innerHTML = "";
       grid.appendChild(buildNotice(data.error || "Failed to load files."));
@@ -341,10 +342,12 @@ function downloadZip() {
 }
 
 function logout() {
-  localStorage.removeItem("adminEventId");
-  localStorage.removeItem("adminEmail");
-  localStorage.removeItem("adminPassword");
-  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
+  fetch(`${API_BASE}/api/user/logout`, {
+    method: "POST",
+    credentials: "include"
+  }).finally(() => {
+    location.href = "/event-admin-login.html";
+  });
 }
 
 loadFiles();

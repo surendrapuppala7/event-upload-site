@@ -3,564 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Create Event</title>
-  <meta name="description" content="Create a new event and generate a guest QR upload link in minutes." />
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    object-src 'none';
-    upgrade-insecure-requests;
-    img-src 'self' data:;
-    connect-src 'self' https://event-upload-api.surendra-david-puppala.workers.dev;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src https://fonts.gstatic.com;
-    script-src 'self' https://cdn.jsdelivr.net 'sha256-FsvFoO83ucvz7GO7njCQ1XOSdKJAIj1iFmJvofuf2kQ=';
-  " />
-  <meta name="referrer" content="no-referrer" />
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
-
+  <title>Create Event • Kachow</title>
+  <meta name="description" content="Create events from your Kachow dashboard." />
+  <meta http-equiv="refresh" content="0; url=manage-events.html" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
   <style>
     :root {
       --bg: #fff7f1;
       --ink: #1b1b1f;
       --muted: #5c5d69;
-      --line: #f0e5dc;
-      --card: #ffffff;
       --brand: #ff6b6b;
-      --brand-2: #5bc0eb;
-      --brand-3: #ffd166;
-      --brand-4: #9b5de5;
+      --line: #f0e5dc;
       --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
-      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
-      --radius-lg: 28px;
-      --radius-md: 16px;
-      --radius-sm: 12px;
+      --radius-lg: 24px;
       --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--ink);
       font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
-      line-height: 1.6;
-    }
-
-    .page {
+      color: var(--ink);
+      background: var(--bg);
       min-height: 100vh;
-      position: relative;
-      overflow: hidden;
-      background:
-        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
-        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
-        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
-        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
-    }
-
-    .container {
-      max-width: 1160px;
-      margin: 0 auto;
-      padding: 0 28px;
-      position: relative;
-      z-index: 1;
-    }
-
-    header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 26px 0;
-    }
-
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      font-size: 1rem;
-      letter-spacing: 0.3px;
-      text-decoration: none;
-      color: var(--ink);
-    }
-
-    .logo-mark {
-      display: inline-flex;
-      align-items: center;
       justify-content: center;
-      width: 64px;
-      height: 50px;
+      padding: 24px;
     }
-
-    .logo-mark svg {
-      width: 64px;
-      height: 50px;
+    .card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      max-width: 520px;
+      text-align: center;
     }
-
-    .logo-text {
+    h1 {
       font-family: "Fraunces", serif;
-      font-size: 1.1rem;
-      letter-spacing: 0.08em;
+      margin: 0 0 8px;
     }
-
-    .button {
+    p { margin: 0 0 18px; color: var(--muted); }
+    a {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 10px 18px;
       border-radius: 999px;
-      border: 1px solid var(--line);
-      background: #fff;
-      color: var(--ink);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.92rem;
-      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
-    }
-
-    .button.primary {
-      background: linear-gradient(135deg, var(--brand), #ff8f8f);
+      background: var(--brand);
       color: #fff;
-      border: none;
-      box-shadow: 0 14px 30px rgba(11, 61, 145, 0.28);
-    }
-
-    .button:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-soft);
-      border-color: rgba(255, 107, 107, 0.3);
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 36px;
-      align-items: start;
-      padding-bottom: 40px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: rgba(255, 107, 107, 0.12);
-      color: var(--brand);
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.2px;
-    }
-
-    h1 {
-      font-family: "Fraunces", serif;
-      font-size: clamp(2.2rem, 3vw, 3.1rem);
-      line-height: 1.1;
-      margin: 16px 0;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .steps {
-      display: grid;
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    .step-card {
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--line);
-      padding: 18px;
-    }
-
-    .step-card strong {
-      font-family: "Fraunces", serif;
-      display: inline-block;
-      font-size: 0.95rem;
-    }
-
-    .panel {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(11, 18, 32, 0.06);
-    }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #1b2433;
-    }
-
-    input {
-      width: 100%;
-      margin-top: 8px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid #d7deea;
-      font-size: 0.98rem;
-      font-family: inherit;
-      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
-    }
-
-    input:focus {
-      border-color: rgba(255, 107, 107, 0.6);
-      box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.15);
-      outline: none;
-    }
-
-    .panel button {
-      width: 100%;
-      border: none;
-      border-radius: 14px;
-      padding: 12px 16px;
-      font-weight: 600;
-      font-size: 1rem;
-      color: #fff;
-      background: linear-gradient(135deg, var(--brand), #ff8f8f);
-      box-shadow: 0 16px 32px rgba(11, 61, 145, 0.2);
-      cursor: pointer;
-      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
-    }
-
-    .panel button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 36px rgba(11, 61, 145, 0.25);
-    }
-
-    .panel button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .status {
-      margin-top: 16px;
-      text-align: center;
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: var(--muted);
-    }
-
-    .qr {
-      margin-top: 18px;
-      background: #f7f9fc;
-      border-radius: var(--radius-md);
-      padding: 18px;
-      border: 1px solid var(--line);
-      text-align: center;
-    }
-
-    .qr h3 {
-      margin: 0;
-      font-family: "Fraunces", serif;
-    }
-
-    .qr a {
-      color: var(--brand);
-      font-weight: 600;
-      word-break: break-word;
-      text-decoration: underline;
-    }
-
-    footer {
-      padding: 28px 0 40px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      border-top: 1px solid var(--line);
-      margin-top: 30px;
-    }
-
-    .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-
-    .footer-links a {
-      color: var(--muted);
       text-decoration: none;
+      font-weight: 700;
+      transition: transform 0.2s var(--ease);
     }
-
-    .footer-links a:hover {
-      color: var(--ink);
-    }
-
-    .fade-up {
-      animation: fadeUp 0.7s var(--ease) both;
-    }
-
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.2s; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 720px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 14px;
-      }
-    }
+    a:hover { transform: translateY(-2px); }
   </style>
 </head>
-
 <body>
-  <div class="page">
-    <div class="container">
-      <header>
-        <a class="logo" href="index.html">
-          <span class="logo-mark" aria-hidden="true">
-            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
-                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
-                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
-                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
-                <circle cx="122" cy="34" r="4" fill="#203040"/>
-                <circle cx="70" cy="70" r="30" fill="#203040"/>
-                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
-                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
-                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
-                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
-                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
-                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
-              </g>
-            </svg>
-          </span>
-          <span class="logo-text">KACHOW</span>
-        </a>
-        <a class="button" href="index.html">Back to Home</a>
-      </header>
-
-      <main class="layout">
-        <section class="fade-up">
-          <span class="eyebrow">Create an event in under a minute</span>
-          <h1>Generate a branded guest upload hub instantly.</h1>
-          <p class="muted">
-            Add the event name and owner email. We will generate a QR-enabled link for guests to upload photos
-            and videos in real time.
-          </p>
-
-          <div class="steps">
-            <div class="step-card">
-              <strong>Step 1</strong>
-              <div class="muted">Create the event and QR link.</div>
-            </div>
-            <div class="step-card">
-              <strong>Step 2</strong>
-              <div class="muted">Share the QR code with guests on-site.</div>
-            </div>
-            <div class="step-card">
-              <strong>Step 3</strong>
-              <div class="muted">Track uploads inside your admin gallery.</div>
-            </div>
-            <div class="step-card">
-              <strong>Step 4</strong>
-              <div class="muted">Download the full album anytime.</div>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel fade-up delay-1">
-          <h2 style="margin-top: 0; font-family: 'Fraunces', serif;">Event details</h2>
-          <p class="muted" style="margin-top: 6px;">Securely generate your QR invite.</p>
-
-          <form class="form" autocomplete="on">
-            <div style="margin-top: 18px;">
-              <label for="eventName">Event Name</label>
-              <input id="eventName" name="eventName" type="text" required maxlength="120" placeholder="e.g. Alex's Birthday Party" />
-            </div>
-
-            <div style="margin-top: 16px;">
-              <label for="ownerEmail">Owner Email</label>
-              <input id="ownerEmail" name="ownerEmail" type="email" required maxlength="320" inputmode="email" placeholder="alex@email.com" />
-            </div>
-
-            <button id="createEventButton" type="button" style="margin-top: 20px;">
-              Create Event
-            </button>
-          </form>
-
-          <p id="status" class="status"></p>
-
-          <div id="qrSection" class="qr" style="display: none;">
-            <h3 id="eventTitle"></h3>
-            <p style="margin: 10px 0 0; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);">Event Link</p>
-            <a id="eventLink" href="#" rel="noopener noreferrer"></a>
-            <div style="margin-top: 16px; display: flex; justify-content: center;">
-              <canvas id="qrCanvas" aria-label="QR code for event link"></canvas>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer>
-        <div class="footer-links">
-          <a href="index.html">Home</a>
-          <a href="manage-events.html">Manage Events</a>
-          <a href="super-admin-login.html">Admin</a>
-        </div>
-        <div style="margin-top: 10px;">Built with Cloudflare Workers, R2, and D1.</div>
-      </footer>
-    </div>
+  <div class="card">
+    <h1>Create events from My Events</h1>
+    <p>We moved event creation into your dashboard for a smoother flow.</p>
+    <a href="manage-events.html">Go to My Events</a>
   </div>
-
-  <script>
-const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
-
-function clampEmail(email) {
-  return email.trim().slice(0, 320);
-}
-
-function clampName(name) {
-  return name.trim().slice(0, 120);
-}
-
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function setStatus(el, msg, kind = "info") {
-  el.textContent = msg;
-  el.className = "status " + (
-    kind === "ok" ? "ok" :
-    kind === "err" ? "err" :
-    ""
-  );
-  if (kind === "ok") el.style.color = "#0d6e52";
-  if (kind === "err") el.style.color = "#b42318";
-  if (kind === "info") el.style.color = "var(--muted)";
-}
-
-function getCooldownMs() {
-  return 15000;
-}
-
-function canAttemptCreate() {
-  const key = "createEventLastAttempt";
-  const last = Number(localStorage.getItem(key) || "0");
-  const now = Date.now();
-  const wait = getCooldownMs() - (now - last);
-  if (wait > 0) return { ok: false, wait };
-  localStorage.setItem(key, String(now));
-  return { ok: true, wait: 0 };
-}
-
-async function generate() {
-  const nameEl = document.getElementById("eventName");
-  const emailEl = document.getElementById("ownerEmail");
-  const statusEl = document.getElementById("status");
-  const qrSection = document.getElementById("qrSection");
-  const button = document.getElementById("createEventButton");
-
-  const name = clampName(nameEl.value);
-  const owner = clampEmail(emailEl.value);
-
-  if (!name || !owner) {
-    setStatus(statusEl, "Please enter both event name and owner email.", "err");
-    return;
-  }
-  if (!isValidEmail(owner)) {
-    setStatus(statusEl, "Please enter a valid email address.", "err");
-    return;
-  }
-
-  const throttle = canAttemptCreate();
-  if (!throttle.ok) {
-    const secs = Math.ceil(throttle.wait / 1000);
-    setStatus(statusEl, `Please wait ${secs}s before trying again.`, "err");
-    return;
-  }
-
-  setStatus(statusEl, "Creating event...", "info");
-  button.disabled = true;
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
-
-    const res = await fetch(`${API_BASE}/api/create-event`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
-      },
-      body: JSON.stringify({ name, owner }),
-      signal: controller.signal
-    });
-
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      if (res.status === 429) {
-        setStatus(statusEl, "Too many requests. Please try again shortly.", "err");
-      } else {
-        setStatus(statusEl, "Error creating event.", "err");
-      }
-      return;
-    }
-
-    const data = await res.json();
-    const eventId = data.eventId;
-
-    if (!eventId) {
-      setStatus(statusEl, "Server response missing eventId.", "err");
-      return;
-    }
-
-    setStatus(statusEl, "Event created! Share the link or let guests scan the QR.", "ok");
-    qrSection.style.display = "block";
-
-    const eventUrl = `${location.origin}/guest-upload.html?eventId=${encodeURIComponent(eventId)}`;
-
-    document.getElementById("eventTitle").textContent = name;
-    const linkEl = document.getElementById("eventLink");
-    linkEl.textContent = eventUrl;
-    linkEl.setAttribute("href", eventUrl);
-
-    const canvas = document.getElementById("qrCanvas");
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    QRCode.toCanvas(canvas, eventUrl, { margin: 1, width: 220 }, (err) => {
-      if (err) console.error(err);
-    });
-  } catch (error) {
-    console.error(error);
-    const msg = (error && error.name === "AbortError")
-      ? "Request timed out. Please try again."
-      : "Network error. Please try again.";
-    setStatus(statusEl, msg, "err");
-  } finally {
-    button.disabled = false;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("createEventButton");
-  btn?.addEventListener("click", (e) => {
-    e.preventDefault();
-    generate();
-  });
-});
-  </script>
 </body>
 </html>

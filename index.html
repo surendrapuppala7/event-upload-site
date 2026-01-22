@@ -120,6 +120,15 @@
       padding-bottom: 10px;
     }
 
+    .nav-group::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: 10px;
+    }
+
     .nav-trigger {
       display: inline-flex;
       align-items: center;
@@ -151,15 +160,23 @@
       border: 1px solid var(--line);
       box-shadow: var(--shadow-soft);
       padding: 10px;
-      display: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(4px);
+      pointer-events: none;
       z-index: 5;
+      transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
     }
 
     .nav-group:hover .nav-menu,
     .nav-group:focus-within .nav-menu,
-    .nav-menu:hover {
+    .nav-group.open .nav-menu {
       display: grid;
       gap: 6px;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
     }
 
     .nav-menu a {
@@ -591,9 +608,7 @@
             <div class="nav-menu">
               <a href="#how-it-works">How it works</a>
               <a href="pricing.html">Pricing</a>
-              <a href="create-event.html">Create event</a>
-              <a href="manage-events.html">Manage events</a>
-              <a href="gallery.html">Gallery</a>
+              <a href="manage-events.html">My events</a>
               <a href="guest-upload.html?eventId=test123">Guest upload demo</a>
             </div>
           </div>
@@ -603,8 +618,7 @@
             </button>
             <div class="nav-menu">
               <a href="event-admin-login.html">Sign in</a>
-              <a href="create-event.html">Create account</a>
-              <a href="super-admin-login.html">Admin</a>
+              <a href="manage-events.html">My events</a>
             </div>
           </div>
         </nav>
@@ -625,7 +639,7 @@
             all organized in a live digital album.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="create-event.html">Start a Free Event</a>
+            <a class="button primary" href="event-admin-login.html">Start a Free Event</a>
             <a class="button" href="manage-events.html">Manage My Events</a>
           </div>
 
@@ -883,9 +897,9 @@
 
       <footer>
         <div class="footer-links">
-          <a href="create-event.html">Create Event</a>
-          <a href="manage-events.html">Manage Events</a>
-          <a href="super-admin-login.html">Admin</a>
+          <a href="manage-events.html">My Events</a>
+          <a href="event-admin-login.html">Sign in</a>
+          <a href="guest-upload.html?eventId=test123">Guest Upload</a>
         </div>
       </footer>
     </div>
@@ -975,6 +989,30 @@ function rotateLiveEvent() {
 
 rotateLiveEvent();
 setInterval(rotateLiveEvent, 6000);
+
+const navGroups = Array.from(document.querySelectorAll(".nav-group"));
+navGroups.forEach((group) => {
+  const trigger = group.querySelector(".nav-trigger");
+  if (!trigger) return;
+  trigger.addEventListener("click", (event) => {
+    event.preventDefault();
+    const isOpen = group.classList.contains("open");
+    navGroups.forEach((g) => g.classList.remove("open"));
+    if (!isOpen) group.classList.add("open");
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".nav-group")) {
+    navGroups.forEach((g) => g.classList.remove("open"));
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    navGroups.forEach((g) => g.classList.remove("open"));
+  }
+});
   </script>
 </body>
 </html>

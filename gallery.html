@@ -277,7 +277,7 @@ const grid = document.getElementById("grid");
 const info = document.getElementById("info");
 
 if (!eventId) {
-  location.href = "/event-admin-login.html";
+  location.href = "/manage-events.html";
 }
 
 info.textContent = `Loading uploads for event ${eventId}…`;
@@ -302,7 +302,7 @@ async function loadFiles() {
     });
 
     if (res.status === 401) {
-      location.href = `/event-admin-login.html?eventId=${encodeURIComponent(eventId)}`;
+      location.href = "/event-admin-login.html";
       return;
     }
 
@@ -396,7 +396,12 @@ function closeModal() {
 }
 
 function logout() {
-  location.href = "/event-admin-login.html?eventId=" + encodeURIComponent(eventId);
+  fetch(`${API_BASE}/api/user/logout`, {
+    method: "POST",
+    credentials: "include"
+  }).finally(() => {
+    location.href = "/event-admin-login.html";
+  });
 }
 
 loadFiles();

@@ -3,274 +3,65 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Super Admin Login • Kachow</title>
-  <meta name="description" content="Super admin access for Kachow." />
+  <title>Admin • Kachow</title>
+  <meta http-equiv="refresh" content="0; url=manage-events.html" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
-
   <style>
     :root {
       --bg: #fff7f1;
       --ink: #1b1b1f;
       --muted: #5c5d69;
       --brand: #ff6b6b;
-      --brand-2: #5bc0eb;
-      --brand-3: #ffd166;
-      --brand-4: #9b5de5;
-      --card: #ffffff;
       --line: #f0e5dc;
       --shadow: 0 20px 60px rgba(22, 20, 32, 0.12);
-      --shadow-soft: 0 12px 30px rgba(22, 20, 32, 0.08);
-      --radius-lg: 28px;
-      --radius-md: 18px;
-      --radius-sm: 12px;
-      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+      --radius-lg: 24px;
     }
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Nunito", system-ui, -apple-system, Segoe UI, sans-serif;
       color: var(--ink);
       background: var(--bg);
-      line-height: 1.6;
-    }
-
-    .page {
       min-height: 100vh;
-      background:
-        radial-gradient(700px 420px at 5% 10%, rgba(255, 209, 102, 0.35), transparent 60%),
-        radial-gradient(640px 420px at 90% 5%, rgba(91, 192, 235, 0.35), transparent 55%),
-        radial-gradient(540px 380px at 20% 90%, rgba(155, 93, 229, 0.18), transparent 60%),
-        linear-gradient(180deg, #fff7f1 0%, #fff1e4 100%);
-    }
-
-    .container {
-      max-width: 1160px;
-      margin: 0 auto;
-      padding: 0 26px;
-    }
-
-    header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 24px 0;
-    }
-
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      text-decoration: none;
-      color: var(--ink);
-    }
-
-    .logo-mark {
-      display: inline-flex;
-      align-items: center;
       justify-content: center;
-      width: 64px;
-      height: 50px;
-    }
-
-    .logo-mark svg {
-      width: 64px;
-      height: 50px;
-    }
-
-    .logo-text {
-      font-family: "Fraunces", serif;
-      font-size: 1.25rem;
-      letter-spacing: 0.08em;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 26px;
-      align-items: start;
-      padding-bottom: 36px;
-    }
-
-    h1 {
-      font-family: "Fraunces", serif;
-      font-size: clamp(2rem, 3vw, 2.6rem);
-      margin: 0 0 8px;
-    }
-
-    .subhead {
-      color: var(--muted);
-      margin: 0;
-    }
-
-    .panel {
-      background: var(--card);
-      border-radius: var(--radius-lg);
       padding: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 28px;
       border: 1px solid var(--line);
       box-shadow: var(--shadow);
+      max-width: 520px;
+      text-align: center;
     }
-
-    label {
-      display: block;
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #1b2433;
+    h1 {
+      font-family: "Fraunces", serif;
+      margin: 0 0 8px;
     }
-
-    input {
-      width: 100%;
-      margin-top: 8px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid #d7deea;
-      font-size: 0.98rem;
-      font-family: inherit;
-      transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
-    }
-
-    input:focus {
-      border-color: rgba(11, 61, 145, 0.5);
-      box-shadow: 0 0 0 3px rgba(11, 61, 145, 0.12);
-      outline: none;
-    }
-
-    .button {
+    p { margin: 0 0 18px; color: var(--muted); }
+    a {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 12px 18px;
-      border-radius: 14px;
-      border: 0;
-      background: linear-gradient(135deg, var(--brand), #ff8f8f);
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: var(--brand);
       color: #fff;
+      text-decoration: none;
       font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 12px 26px rgba(22, 20, 32, 0.18);
-      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
-      width: 100%;
-    }
-
-    .button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 30px rgba(22, 20, 32, 0.22);
-    }
-
-    .button.secondary {
-      width: auto;
-      background: #fff;
-      color: var(--ink);
-      border: 1px solid var(--line);
-      box-shadow: 0 8px 18px rgba(22, 20, 32, 0.08);
-    }
-
-    .status {
-      margin-top: 12px;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #b42318;
-      font-weight: 700;
-    }
-
-    .notice {
-      margin-top: 16px;
-      padding: 12px 16px;
-      border-radius: 14px;
-      border: 1px dashed rgba(255, 107, 107, 0.35);
-      background: rgba(255, 255, 255, 0.8);
-      font-size: 0.92rem;
-      color: var(--muted);
-    }
-
-    @media (max-width: 720px) {
-      header { flex-direction: column; align-items: flex-start; gap: 14px; }
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="container">
-      <header>
-        <a class="logo" href="index.html">
-          <span class="logo-mark" aria-hidden="true">
-            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
-                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
-                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
-                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
-                <circle cx="122" cy="34" r="4" fill="#203040"/>
-                <circle cx="70" cy="70" r="30" fill="#203040"/>
-                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
-                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
-                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
-                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
-                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
-                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
-              </g>
-            </svg>
-          </span>
-          <span class="logo-text">KACHOW</span>
-        </a>
-        <a class="button secondary" href="index.html">Back to home</a>
-      </header>
-
-      <main class="layout">
-        <section>
-          <h1>Super admin access</h1>
-          <p class="subhead">Use your dedicated super admin password to continue.</p>
-          <div class="notice">This area controls event admins and platform settings.</div>
-        </section>
-
-        <section class="panel">
-          <h2 style="margin: 0 0 6px; font-family: 'Fraunces', serif;">Sign in</h2>
-          <p class="subhead">Enter your privileged credentials.</p>
-          <div style="margin-top: 16px;">
-            <label for="password">Password</label>
-            <input id="password" type="password" required placeholder="Enter Super Admin Password" />
-          </div>
-          <button onclick="login()" class="button" style="margin-top: 16px;">Login</button>
-          <p id="status" class="status"></p>
-        </section>
-      </main>
-    </div>
+  <div class="card">
+    <h1>Admin access removed</h1>
+    <p>All event management now lives in My Events.</p>
+    <a href="manage-events.html">Go to My Events</a>
   </div>
-
-<script>
-async function login() {
-  const password = document.getElementById("password").value.trim();
-  const status = document.getElementById("status");
-  const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
-
-  try {
-    const res = await fetch(
-      `${API_BASE}/api/super-admin/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password })
-      }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      status.textContent = data.error || "Login failed";
-      return;
-    }
-
-    localStorage.setItem("superAdminPassword", password);
-    location.href = "/super-admin-dashboard.html";
-  } catch (error) {
-    console.error(error);
-    status.textContent = "Network error. Please try again.";
-  }
-}
-</script>
 </body>
 </html>
