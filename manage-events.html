@@ -365,10 +365,12 @@
             </div>
           </div>
           <div class="nav-group">
-            <button class="nav-trigger" type="button">Account ▾</button>
+            <button id="accountTrigger" class="nav-trigger" type="button">Account ▾</button>
             <div class="nav-menu">
-              <a href="event-admin-login.html">Sign in</a>
+              <span id="accountEmail" style="padding: 8px 10px; font-weight: 700; font-size: 0.85rem; color: var(--muted); display: none;"></span>
+              <a id="accountSignIn" href="event-admin-login.html">Sign in</a>
               <a href="manage-events.html">My events</a>
+              <a id="accountSignOut" href="#" style="display: none;">Sign out</a>
             </div>
           </div>
         </nav>
@@ -453,6 +455,11 @@ const birthdayInput = document.getElementById("birthday");
 const saveProfileBtn = document.getElementById("saveProfileBtn");
 const profileStatus = document.getElementById("profileStatus");
 
+const accountTrigger = document.getElementById("accountTrigger");
+const accountEmail = document.getElementById("accountEmail");
+const accountSignIn = document.getElementById("accountSignIn");
+const accountSignOut = document.getElementById("accountSignOut");
+
 const signInBtn = document.getElementById("signInBtn");
 const signOutBtn = document.getElementById("signOutBtn");
 const refreshBtn = document.getElementById("refreshBtn");
@@ -466,6 +473,10 @@ signOutBtn.addEventListener("click", () => logout());
 refreshBtn.addEventListener("click", () => loadEvents());
 createBtn.addEventListener("click", () => createEvent());
 saveProfileBtn.addEventListener("click", () => saveProfile());
+accountSignOut.addEventListener("click", (event) => {
+  event.preventDefault();
+  logout();
+});
 
 function setStatus(el, msg, type) {
   el.textContent = msg || "";
@@ -513,6 +524,7 @@ function showSignedOut() {
   profileComplete = false;
   profilePanel.classList.add("hidden");
   setStatus(profileStatus, "");
+  updateAccountMenu();
   if (createHint) {
     createHint.textContent = "One free event per account. Your code is short and easy to share.";
   }
@@ -525,8 +537,11 @@ async function loadProfile() {
 
   const res = await fetch(`${API_BASE}/api/user/profile`, { credentials: "include" });
   if (!res.ok) {
-    profilePanel.classList.remove("hidden");
-    setStatus(profileStatus, "We couldn't load your profile yet. Please try again.", "err");
+    updateAccountMenu();
+    if (currentRole === "user") {
+      profilePanel.classList.remove("hidden");
+      setStatus(profileStatus, "We couldn't load your profile yet. Please try again.", "err");
+    }
     return;
   }
 
@@ -536,7 +551,9 @@ async function loadProfile() {
   birthdayInput.value = data.birthday || "";
   profileComplete = !!data.profile_complete;
 
-  if (!profileComplete) {
+  updateAccountMenu(data);
+
+  if (currentRole === "user" && !profileComplete) {
     profilePanel.classList.remove("hidden");
   }
 }
@@ -578,6 +595,26 @@ async function saveProfile() {
   } finally {
     saveProfileBtn.disabled = false;
   }
+}
+
+function updateAccountMenu(profile) {
+  const signedInNow = userStatus.textContent.startsWith("Signed in as");
+  if (!signedInNow) {
+    accountTrigger.textContent = "Account ▾";
+    accountEmail.style.display = "none";
+    accountSignOut.style.display = "none";
+    accountSignIn.style.display = "block";
+    return;
+  }
+
+  const name = profile?.first_name && profile?.last_name
+    ? `${profile.first_name} ${profile.last_name}`
+    : "";
+  accountTrigger.textContent = name ? `${name} ▾` : "Account ▾";
+  accountEmail.textContent = profile?.email || userStatus.textContent.replace("Signed in as ", "");
+  accountEmail.style.display = "block";
+  accountSignOut.style.display = "block";
+  accountSignIn.style.display = "none";
 }
 
 async function loadEvents() {
