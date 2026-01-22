@@ -391,7 +391,7 @@
           <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
             <div>
               <h2 style="margin: 0; font-family: 'Fraunces', serif;">Create your event</h2>
-              <p class="subhead" style="margin: 4px 0 0;">One free event per account. Your code is short and easy to share.</p>
+              <p id="createHint" class="subhead" style="margin: 4px 0 0;">One free event per account. Your code is short and easy to share.</p>
             </div>
             <button id="signOutBtn" class="button ghost">Sign out</button>
           </div>
@@ -421,6 +421,8 @@ const signedOut = document.getElementById("signedOut");
 const signedIn = document.getElementById("signedIn");
 const eventsGrid = document.getElementById("eventsGrid");
 const createStatus = document.getElementById("createStatus");
+const createHint = document.getElementById("createHint");
+let currentRole = "user";
 
 const signInBtn = document.getElementById("signInBtn");
 const signOutBtn = document.getElementById("signOutBtn");
@@ -455,7 +457,14 @@ async function bootstrap() {
     }
 
     const data = await res.json();
-    userStatus.textContent = `Signed in as ${data.email}`;
+    currentRole = data.role || "user";
+    const roleLabel = currentRole !== "user" ? ` (${currentRole})` : "";
+    userStatus.textContent = `Signed in as ${data.email}${roleLabel}`;
+    if (currentRole !== "user") {
+      createHint.textContent = "Staff access enabled. Unlimited events and full support tools.";
+    } else {
+      createHint.textContent = "One free event per account. Your code is short and easy to share.";
+    }
     signedIn.classList.remove("hidden");
     await loadEvents();
   } catch (err) {
@@ -469,6 +478,10 @@ function showSignedOut() {
   signedOut.classList.remove("hidden");
   signedIn.classList.add("hidden");
   eventsGrid.innerHTML = "";
+  currentRole = "user";
+  if (createHint) {
+    createHint.textContent = "One free event per account. Your code is short and easy to share.";
+  }
 }
 
 async function loadEvents() {

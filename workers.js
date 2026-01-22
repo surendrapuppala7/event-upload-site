@@ -13,11 +13,12 @@ function getAllowedOrigin(req, env) {
 }
 
 function corsHeadersFor(req, env, mode) {
+  const allowHeaders = "Content-Type, Authorization, X-Staff-Reason";
   if (mode === "public") {
     return {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Headers": allowHeaders,
       "Vary": "Origin",
     };
   }
@@ -28,7 +29,8 @@ function corsHeadersFor(req, env, mode) {
   return {
     "Access-Control-Allow-Origin": allowed,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": allowHeaders,
+    "Access-Control-Allow-Credentials": "true",
     "Vary": "Origin",
   };
 }
@@ -183,13 +185,22 @@ async function isUserAuthorizedForEvent(env, email, eventId) {
   return !!admin;
 }
 
+async function getStaffRole(env, email) {
+  try {
+    const row = await env.DB.prepare(
+      "SELECT role FROM staff_users WHERE lower(email) = ?"
+    )
+      .bind(normalizeEmail(email))
+      .first();
+    return row?.role || "";
+  } catch {
+    return "";
+  }
+}
+
 async function isStaffUser(env, email) {
-  const row = await env.DB.prepare(
-    "SELECT role FROM staff_users WHERE lower(email) = ?"
-  )
-    .bind(normalizeEmail(email))
-    .first();
-  return !!row;
+  const role = await getStaffRole(env, email);
+  return !!role;
 }
 
 function generateEventCode(length = 6) {
@@ -278,6 +289,39 @@ function buildUserCookie(token, maxAgeSeconds, env) {
   ];
   if (typeof maxAgeSeconds === "number") attrs.push(`Max-Age=${maxAgeSeconds}`);
   return `user_session=${token}; ${attrs.join("; ")}`;
+}
+
+function getStaffReason(req, env) {
+  const reason = clamp(req.headers.get("X-Staff-Reason"), 200);
+  if ((env.STAFF_REQUIRE_REASON || "").trim() === "1" && !reason) {
+    return { ok: false, reason: "", error: "staff_reason_required" };
+  }
+  return { ok: true, reason };
+}
+
+async function logStaffAction(env, entry) {
+  try {
+    await env.DB.prepare(`
+      INSERT INTO staff_audit
+        (email, role, action, event_id, file, reason, meta, ip, user_agent, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+      .bind(
+        entry.email || "",
+        entry.role || "",
+        entry.action || "",
+        entry.eventId || "",
+        entry.file || "",
+        entry.reason || "",
+        entry.meta || "",
+        entry.ip || "",
+        entry.userAgent || "",
+        new Date().toISOString()
+      )
+      .run();
+  } catch {
+    // best-effort audit logging; avoid breaking requests
+  }
 }
 
 // ==============================
@@ -433,7 +477,8 @@ export default {
     if (req.method === "GET" && url.pathname === "/api/user/me") {
       const sess = await requireUserSession(env, req);
       if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
-      return jsonResponse({ email: sess.email }, 200, cors);
+      const staffRole = await getStaffRole(env, sess.email);
+      return jsonResponse({ email: sess.email, role: staffRole || "user" }, 200, cors);
     }
 
     if (req.method === "GET" && url.pathname === "/api/user/events") {
@@ -441,19 +486,30 @@ export default {
       if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
 
       const email = normalizeEmail(sess.email);
-      const result = await env.DB.prepare(`
-        SELECT id, name, owner, created_at, 'owner' AS role
-        FROM events
-        WHERE lower(owner) = ?
-        UNION ALL
-        SELECT e.id, e.name, e.owner, e.created_at, 'admin' AS role
-        FROM events e
-        JOIN event_admins a ON a.event_id = e.id
-        WHERE lower(a.email) = ? AND lower(e.owner) != ?
-        ORDER BY created_at DESC
-      `)
-        .bind(email, email, email)
-        .all();
+      const staffRole = await getStaffRole(env, sess.email);
+      let result;
+      if (staffRole) {
+        result = await env.DB.prepare(`
+          SELECT id, name, owner, created_at, active
+          FROM events
+          ORDER BY created_at DESC
+          LIMIT 200
+        `).all();
+      } else {
+        result = await env.DB.prepare(`
+          SELECT id, name, owner, created_at, 'owner' AS role
+          FROM events
+          WHERE lower(owner) = ?
+          UNION ALL
+          SELECT e.id, e.name, e.owner, e.created_at, 'admin' AS role
+          FROM events e
+          JOIN event_admins a ON a.event_id = e.id
+          WHERE lower(a.email) = ? AND lower(e.owner) != ?
+          ORDER BY created_at DESC
+        `)
+          .bind(email, email, email)
+          .all();
+      }
 
       return jsonResponse({ events: result.results || [] }, 200, cors);
     }
@@ -470,15 +526,18 @@ export default {
       if (!name) return jsonResponse({ error: "name required" }, 400, cors);
 
       const owner = normalizeEmail(sess.email);
-      const existing = await env.DB.prepare(
-        "SELECT COUNT(*) as count FROM events WHERE lower(owner) = ?"
-      )
-        .bind(owner)
-        .first();
+      const staffRole = await getStaffRole(env, sess.email);
+      if (!staffRole) {
+        const existing = await env.DB.prepare(
+          "SELECT COUNT(*) as count FROM events WHERE lower(owner) = ?"
+        )
+          .bind(owner)
+          .first();
 
-      const count = Number(existing?.count || 0);
-      if (count >= 1) {
-        return jsonResponse({ error: "free_limit_reached" }, 403, cors);
+        const count = Number(existing?.count || 0);
+        if (count >= 1) {
+          return jsonResponse({ error: "free_limit_reached" }, 403, cors);
+        }
       }
 
       const eventId = await generateUniqueEventId(env);
@@ -528,8 +587,8 @@ export default {
 
       const sess = await requireUserSession(env, req);
       if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
-      const isStaff = await isStaffUser(env, sess.email);
-      if (!isStaff) return jsonResponse({ error: "Forbidden" }, 403, cors);
+      const staffRole = await getStaffRole(env, sess.email);
+      if (!staffRole) return jsonResponse({ error: "Forbidden" }, 403, cors);
 
       const q = String(url.searchParams.get("q") || "").trim().toLowerCase();
       let result;
@@ -554,6 +613,15 @@ export default {
           LIMIT 200
         `).all();
       }
+
+      await logStaffAction(env, {
+        email: sess.email,
+        role: staffRole,
+        action: "staff_list_events",
+        meta: JSON.stringify({ q }),
+        ip,
+        userAgent: req.headers.get("User-Agent") || "",
+      });
 
       return jsonResponse({ events: result.results || [] }, 200, cors);
     }
@@ -624,10 +692,29 @@ export default {
 
       const sess = await requireUserSession(env, req);
       if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
+      const staffRole = await getStaffRole(env, sess.email);
+      let staffReason = "";
+      if (staffRole) {
+        const reasonCheck = getStaffReason(req, env);
+        if (!reasonCheck.ok) return jsonResponse({ error: reasonCheck.error }, 400, cors);
+        staffReason = reasonCheck.reason;
+      }
       const allowed = await isUserAuthorizedForEvent(env, sess.email, found.id);
       if (!allowed) return jsonResponse({ error: "Forbidden" }, 403, cors);
 
       await env.EVENT_BUCKET.delete(`${found.id}/${file}`);
+      if (staffRole) {
+        await logStaffAction(env, {
+          email: sess.email,
+          role: staffRole,
+          action: "staff_delete_file",
+          eventId: found.id,
+          file,
+          reason: staffReason,
+          ip,
+          userAgent: req.headers.get("User-Agent") || "",
+        });
+      }
       return jsonResponse({ ok: true }, 200, cors);
     }
 
