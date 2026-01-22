@@ -430,10 +430,12 @@
             </div>
           </div>
           <div class="nav-group">
-            <button class="nav-trigger" type="button">Account ▾</button>
+            <button id="accountTrigger" class="nav-trigger" type="button">Account ▾</button>
             <div class="nav-menu">
-              <a href="event-admin-login.html">Sign in</a>
+              <span id="accountEmail" style="padding: 8px 10px; font-weight: 700; font-size: 0.85rem; color: var(--muted); display: none;"></span>
+              <a id="accountSignIn" href="event-admin-login.html">Sign in</a>
               <a href="manage-events.html">My events</a>
+              <a id="accountSignOut" href="#" style="display: none;">Sign out</a>
             </div>
           </div>
         </nav>
@@ -564,6 +566,57 @@
     </div>
   </div>
   <script>
+  const API_BASE = "https://event-upload-api.surendra-david-puppala.workers.dev";
+  const accountTrigger = document.getElementById("accountTrigger");
+  const accountEmail = document.getElementById("accountEmail");
+  const accountSignIn = document.getElementById("accountSignIn");
+  const accountSignOut = document.getElementById("accountSignOut");
+
+  async function refreshAccountMenu() {
+    if (!accountTrigger || !accountSignIn || !accountSignOut || !accountEmail) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/user/me`, { credentials: "include" });
+      if (!res.ok) throw new Error("no-session");
+      const me = await res.json().catch(() => ({}));
+
+      let profile = null;
+      try {
+        const profileRes = await fetch(`${API_BASE}/api/user/profile`, { credentials: "include" });
+        if (profileRes.ok) profile = await profileRes.json().catch(() => null);
+      } catch {}
+
+      const name = profile?.first_name && profile?.last_name
+        ? `${profile.first_name} ${profile.last_name}`
+        : "";
+
+      accountTrigger.textContent = name ? `${name} ▾` : "Account ▾";
+      accountEmail.textContent = profile?.email || me.email || "";
+      accountEmail.style.display = "block";
+      accountSignIn.style.display = "none";
+      accountSignOut.style.display = "block";
+    } catch {
+      accountTrigger.textContent = "Account ▾";
+      accountEmail.style.display = "none";
+      accountSignIn.style.display = "block";
+      accountSignOut.style.display = "none";
+    }
+  }
+
+  if (accountSignOut) {
+    accountSignOut.addEventListener("click", async (event) => {
+      event.preventDefault();
+      try {
+        await fetch(`${API_BASE}/api/user/logout`, {
+          method: "POST",
+          credentials: "include"
+        });
+      } catch {}
+      refreshAccountMenu();
+    });
+  }
+
+  refreshAccountMenu();
+
   const navGroups = Array.from(document.querySelectorAll(".nav-group"));
   navGroups.forEach((group) => {
     const trigger = group.querySelector(".nav-trigger");
