@@ -403,6 +403,27 @@
           </div>
         </section>
 
+        <section id="profilePanel" class="panel hidden">
+          <h2 style="margin: 0 0 6px; font-family: 'Fraunces', serif;">Complete your profile</h2>
+          <p class="subhead">We’ll use this to personalize your account and keep your events secure.</p>
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <div>
+              <label for="firstName">First name</label>
+              <input id="firstName" type="text" maxlength="80" placeholder="First name" />
+            </div>
+            <div>
+              <label for="lastName">Last name</label>
+              <input id="lastName" type="text" maxlength="80" placeholder="Last name" />
+            </div>
+            <div>
+              <label for="birthday">Birthday</label>
+              <input id="birthday" type="date" />
+            </div>
+          </div>
+          <button id="saveProfileBtn" class="button primary" style="margin-top: 16px;">Save profile</button>
+          <p id="profileStatus" class="status" aria-live="polite"></p>
+        </section>
+
         <section>
           <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <h2 style="margin: 0; font-family: 'Fraunces', serif;">Your events</h2>
@@ -423,6 +444,14 @@ const eventsGrid = document.getElementById("eventsGrid");
 const createStatus = document.getElementById("createStatus");
 const createHint = document.getElementById("createHint");
 let currentRole = "user";
+let profileComplete = false;
+
+const profilePanel = document.getElementById("profilePanel");
+const firstNameInput = document.getElementById("firstName");
+const lastNameInput = document.getElementById("lastName");
+const birthdayInput = document.getElementById("birthday");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
+const profileStatus = document.getElementById("profileStatus");
 
 const signInBtn = document.getElementById("signInBtn");
 const signOutBtn = document.getElementById("signOutBtn");
@@ -436,6 +465,7 @@ signInBtn.addEventListener("click", () => {
 signOutBtn.addEventListener("click", () => logout());
 refreshBtn.addEventListener("click", () => loadEvents());
 createBtn.addEventListener("click", () => createEvent());
+saveProfileBtn.addEventListener("click", () => saveProfile());
 
 function setStatus(el, msg, type) {
   el.textContent = msg || "";
@@ -466,6 +496,7 @@ async function bootstrap() {
       createHint.textContent = "One free event per account. Your code is short and easy to share.";
     }
     signedIn.classList.remove("hidden");
+    await loadProfile();
     await loadEvents();
   } catch (err) {
     console.error(err);
@@ -479,8 +510,73 @@ function showSignedOut() {
   signedIn.classList.add("hidden");
   eventsGrid.innerHTML = "";
   currentRole = "user";
+  profileComplete = false;
+  profilePanel.classList.add("hidden");
+  setStatus(profileStatus, "");
   if (createHint) {
     createHint.textContent = "One free event per account. Your code is short and easy to share.";
+  }
+}
+
+async function loadProfile() {
+  setStatus(profileStatus, "");
+  profilePanel.classList.add("hidden");
+  profileComplete = false;
+
+  const res = await fetch(`${API_BASE}/api/user/profile`, { credentials: "include" });
+  if (!res.ok) {
+    profilePanel.classList.remove("hidden");
+    setStatus(profileStatus, "We couldn't load your profile yet. Please try again.", "err");
+    return;
+  }
+
+  const data = await res.json().catch(() => ({}));
+  firstNameInput.value = data.first_name || "";
+  lastNameInput.value = data.last_name || "";
+  birthdayInput.value = data.birthday || "";
+  profileComplete = !!data.profile_complete;
+
+  if (!profileComplete) {
+    profilePanel.classList.remove("hidden");
+  }
+}
+
+async function saveProfile() {
+  const firstName = firstNameInput.value.trim();
+  const lastName = lastNameInput.value.trim();
+  const birthday = birthdayInput.value;
+
+  if (!firstName || !lastName || !birthday) {
+    setStatus(profileStatus, "Please fill out all fields.", "err");
+    return;
+  }
+
+  setStatus(profileStatus, "Saving your profile…");
+  saveProfileBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/user/profile`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        birthday
+      })
+    });
+    if (!res.ok) {
+      setStatus(profileStatus, "Could not save profile. Try again.", "err");
+      return;
+    }
+    profileComplete = true;
+    profilePanel.classList.add("hidden");
+    setStatus(profileStatus, "");
+  } catch (err) {
+    console.error(err);
+    setStatus(profileStatus, "Network error. Please try again.", "err");
+  } finally {
+    saveProfileBtn.disabled = false;
   }
 }
 
@@ -489,6 +585,12 @@ async function loadEvents() {
   eventsGrid.appendChild(buildNotice("Loading your events…"));
 
   try {
+    if (!profileComplete && currentRole === "user") {
+      eventsGrid.innerHTML = "";
+      eventsGrid.appendChild(buildNotice("Complete your profile to see and create events."));
+      return;
+    }
+
     const res = await fetch(`${API_BASE}/api/user/events`, { credentials: "include" });
     if (res.status === 401) {
       showSignedOut();
@@ -522,6 +624,12 @@ async function createEvent() {
   const name = document.getElementById("eventName").value.trim();
   if (!name) {
     setStatus(createStatus, "Please enter an event name.", "err");
+    return;
+  }
+
+  if (!profileComplete && currentRole === "user") {
+    setStatus(createStatus, "Please complete your profile first.", "err");
+    profilePanel.classList.remove("hidden");
     return;
   }
 

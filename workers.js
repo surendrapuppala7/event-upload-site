@@ -95,6 +95,18 @@ function clamp(s, n) {
   return String(s || "").trim().slice(0, n);
 }
 
+function normalizeName(s, n = 80) {
+  return clamp(s, n);
+}
+
+function normalizeBirthday(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  // Expect YYYY-MM-DD
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return "";
+  return raw;
+}
+
 function normalizeEventIdInput(raw) {
   return clamp(raw, 64);
 }
@@ -201,6 +213,42 @@ async function getStaffRole(env, email) {
 async function isStaffUser(env, email) {
   const role = await getStaffRole(env, email);
   return !!role;
+}
+
+async function getUserProfile(env, email) {
+  try {
+    return await env.DB.prepare(
+      "SELECT email, first_name, last_name, birthday, created_at, updated_at FROM users WHERE lower(email) = ?"
+    )
+      .bind(normalizeEmail(email))
+      .first();
+  } catch {
+    return null;
+  }
+}
+
+function isProfileComplete(profile) {
+  return !!(profile?.first_name && profile?.last_name && profile?.birthday);
+}
+
+async function upsertUserProfile(env, profile) {
+  const now = new Date().toISOString();
+  const email = normalizeEmail(profile.email);
+  const firstName = normalizeName(profile.first_name);
+  const lastName = normalizeName(profile.last_name);
+  const birthday = normalizeBirthday(profile.birthday);
+
+  await env.DB.prepare(`
+    INSERT INTO users (email, first_name, last_name, birthday, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(email) DO UPDATE SET
+      first_name = excluded.first_name,
+      last_name = excluded.last_name,
+      birthday = excluded.birthday,
+      updated_at = excluded.updated_at
+  `)
+    .bind(email, firstName, lastName, birthday, now, now)
+    .run();
 }
 
 function generateEventCode(length = 6) {
@@ -451,6 +499,33 @@ export default {
         .bind(token, email, expires, new Date().toISOString())
         .run();
 
+      // Best-effort user profile seed (if users table exists)
+      try {
+        const givenName = normalizeName(info.given_name);
+        const familyName = normalizeName(info.family_name);
+        if (givenName || familyName) {
+          const now = new Date().toISOString();
+          await env.DB.prepare(`
+            INSERT INTO users (email, first_name, last_name, birthday, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(email) DO UPDATE SET
+              first_name = CASE
+                WHEN users.first_name IS NULL OR users.first_name = '' THEN excluded.first_name
+                ELSE users.first_name
+              END,
+              last_name = CASE
+                WHEN users.last_name IS NULL OR users.last_name = '' THEN excluded.last_name
+                ELSE users.last_name
+              END,
+              updated_at = excluded.updated_at
+          `)
+            .bind(email, givenName, familyName, "", now, now)
+            .run();
+        }
+      } catch {
+        // ignore if users table not ready
+      }
+
       const appOrigin = getAppOrigin(env, req);
       let redirectUrl = `${appOrigin}/manage-events.html`;
 
@@ -478,7 +553,61 @@ export default {
       const sess = await requireUserSession(env, req);
       if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
       const staffRole = await getStaffRole(env, sess.email);
-      return jsonResponse({ email: sess.email, role: staffRole || "user" }, 200, cors);
+      const profile = await getUserProfile(env, sess.email);
+      return jsonResponse({
+        email: sess.email,
+        role: staffRole || "user",
+        profile_complete: isProfileComplete(profile),
+      }, 200, cors);
+    }
+
+    // ==============================
+    // USER PROFILE
+    // GET /api/user/profile
+    // POST /api/user/profile
+    // ==============================
+    if (url.pathname === "/api/user/profile") {
+      const sess = await requireUserSession(env, req);
+      if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
+
+      if (req.method === "GET") {
+        const profile = await getUserProfile(env, sess.email);
+        const data = profile || {
+          email: sess.email,
+          first_name: "",
+          last_name: "",
+          birthday: "",
+          created_at: "",
+          updated_at: "",
+        };
+        return jsonResponse({
+          email: data.email,
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          birthday: data.birthday || "",
+          profile_complete: isProfileComplete(data),
+        }, 200, cors);
+      }
+
+      if (req.method === "POST") {
+        const body = await req.json().catch(() => null);
+        const firstName = normalizeName(body?.first_name);
+        const lastName = normalizeName(body?.last_name);
+        const birthday = normalizeBirthday(body?.birthday);
+
+        if (!firstName || !lastName || !birthday) {
+          return jsonResponse({ error: "profile_incomplete" }, 400, cors);
+        }
+
+        await upsertUserProfile(env, {
+          email: sess.email,
+          first_name: firstName,
+          last_name: lastName,
+          birthday,
+        });
+
+        return jsonResponse({ ok: true }, 200, cors);
+      }
     }
 
     if (req.method === "GET" && url.pathname === "/api/user/events") {
