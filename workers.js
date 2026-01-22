@@ -177,9 +177,19 @@ async function deleteUserSession(env, token) {
 async function isUserAuthorizedForEvent(env, email, eventId) {
   const ev = await getEvent(env, eventId);
   if (!ev) return false;
+  if (await isStaffUser(env, email)) return true;
   if (normalizeEmail(ev.owner) === normalizeEmail(email)) return true;
   const admin = await getEventAdmin(env, eventId, normalizeEmail(email));
   return !!admin;
+}
+
+async function isStaffUser(env, email) {
+  const row = await env.DB.prepare(
+    "SELECT role FROM staff_users WHERE lower(email) = ?"
+  )
+    .bind(normalizeEmail(email))
+    .first();
+  return !!row;
 }
 
 function generateEventCode(length = 6) {
@@ -236,6 +246,14 @@ function getAppOrigin(env, req) {
   if (allow.length) return allow[0].replace(/\/$/, "");
 
   return new URL(req.url).origin;
+}
+
+function getGoogleClientId(env) {
+  return (env.GOOGLE_OAUTH_CLIENT_ID || env.GOOGLE_CLIENT_ID || "").trim();
+}
+
+function getGoogleClientSecret(env) {
+  return (env.GOOGLE_OAUTH_CLIENT_SECRET || env.GOOGLE_CLIENT_SECRET || "").trim();
 }
 
 function buildAdminCookie(token, maxAgeSeconds, env) {
@@ -310,8 +328,9 @@ export default {
       );
 
       const oauthRedirect = getOAuthRedirect(env);
+      const clientId = getGoogleClientId(env);
       const qs = new URLSearchParams({
-        client_id: env.GOOGLE_OAUTH_CLIENT_ID,
+        client_id: clientId,
         redirect_uri: oauthRedirect,
         response_type: "code",
         scope: "openid email",
@@ -346,12 +365,14 @@ export default {
 
       // Exchange code for tokens
       const oauthRedirect = getOAuthRedirect(env);
+      const clientId = getGoogleClientId(env);
+      const clientSecret = getGoogleClientSecret(env);
       const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
-          client_id: env.GOOGLE_OAUTH_CLIENT_ID,
-          client_secret: env.GOOGLE_OAUTH_CLIENT_SECRET,
+          client_id: clientId,
+          client_secret: clientSecret,
           code,
           grant_type: "authorization_code",
           redirect_uri: oauthRedirect,
@@ -370,7 +391,7 @@ export default {
       );
       const info = await infoRes.json().catch(() => ({}));
 
-      if (info.aud !== env.GOOGLE_OAUTH_CLIENT_ID || info.email_verified !== "true") {
+      if (info.aud !== clientId || info.email_verified !== "true") {
         return textResponse("Untrusted account", 403, cors);
       }
 
@@ -497,6 +518,46 @@ export default {
       });
     }
 
+    // ==============================
+    // STAFF: LIST EVENTS (admin/support)
+    // GET /api/staff/events?q=...
+    // ==============================
+    if (req.method === "GET" && url.pathname === "/api/staff/events") {
+      const ok = await rateLimit(env, `staff-events:${ip}`, 60, 60);
+      if (!ok) return jsonResponse({ error: "Too many requests" }, 429, cors);
+
+      const sess = await requireUserSession(env, req);
+      if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
+      const isStaff = await isStaffUser(env, sess.email);
+      if (!isStaff) return jsonResponse({ error: "Forbidden" }, 403, cors);
+
+      const q = String(url.searchParams.get("q") || "").trim().toLowerCase();
+      let result;
+      if (q) {
+        const like = `%${q}%`;
+        result = await env.DB.prepare(`
+          SELECT id, name, owner, created_at, active
+          FROM events
+          WHERE lower(id) LIKE ?
+             OR lower(name) LIKE ?
+             OR lower(owner) LIKE ?
+          ORDER BY created_at DESC
+          LIMIT 200
+        `)
+          .bind(like, like, like)
+          .all();
+      } else {
+        result = await env.DB.prepare(`
+          SELECT id, name, owner, created_at, active
+          FROM events
+          ORDER BY created_at DESC
+          LIMIT 200
+        `).all();
+      }
+
+      return jsonResponse({ events: result.results || [] }, 200, cors);
+    }
+
     // Backward-compatible logout alias
     if (req.method === "POST" && url.pathname === "/api/event-admin/logout") {
       const ok = await rateLimit(env, `user-logout:${ip}`, 60, 60);
@@ -542,6 +603,32 @@ export default {
       }));
 
       return jsonResponse({ files }, 200, cors);
+    }
+
+    // ==============================
+    // EVENT ADMIN DELETE FILE (owner/admin/staff)
+    // POST /api/event-admin/delete-file  { eventId, file }
+    // ==============================
+    if (req.method === "POST" && url.pathname === "/api/event-admin/delete-file") {
+      const ok = await rateLimit(env, `admin-delete:${ip}`, 120, 60);
+      if (!ok) return jsonResponse({ error: "Too many requests" }, 429, cors);
+
+      const body = await req.json().catch(() => null);
+      const eventIdRaw = normalizeEventIdInput(body?.eventId);
+      const file = clamp(body?.file, 200);
+      if (!eventIdRaw || !file) return jsonResponse({ error: "eventId and file required" }, 400, cors);
+      if (file.includes("..") || file.includes("/")) return jsonResponse({ error: "invalid file" }, 400, cors);
+
+      const found = await findEvent(env, eventIdRaw);
+      if (!found.event) return jsonResponse({ error: "event not found" }, 404, cors);
+
+      const sess = await requireUserSession(env, req);
+      if (!sess) return jsonResponse({ error: "Unauthorized" }, 401, cors);
+      const allowed = await isUserAuthorizedForEvent(env, sess.email, found.id);
+      if (!allowed) return jsonResponse({ error: "Forbidden" }, 403, cors);
+
+      await env.EVENT_BUCKET.delete(`${found.id}/${file}`);
+      return jsonResponse({ ok: true }, 200, cors);
     }
 
     // ==============================
