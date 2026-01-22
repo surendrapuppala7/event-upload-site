@@ -61,13 +61,21 @@
       text-align: center;
     }
 
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
     .logo {
       display: inline-flex;
       align-items: center;
       gap: 10px;
       font-weight: 800;
       letter-spacing: 0.3px;
-      margin-bottom: 12px;
       text-decoration: none;
       color: var(--ink);
     }
@@ -95,7 +103,6 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 6px;
       color: var(--muted);
       font-weight: 700;
       text-decoration: none;
@@ -145,10 +152,19 @@
 
     .qr-block {
       margin: 18px 0 16px;
-      padding: 16px;
-      border-radius: var(--radius-md);
-      border: 1px dashed #f1d9cf;
-      background: #fff9f4;
+      display: grid;
+      gap: 12px;
+      justify-items: center;
+    }
+
+    .qr-frame {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid #f1d3c7;
+      background:
+        radial-gradient(200px 120px at 10% 10%, rgba(255, 209, 102, 0.18), transparent 60%),
+        linear-gradient(180deg, #fff6ee 0%, #fff2ea 100%);
+      box-shadow: 0 14px 34px rgba(22, 20, 32, 0.1);
       display: grid;
       gap: 12px;
       justify-items: center;
@@ -216,36 +232,40 @@
 <body>
   <div class="page">
     <div class="card">
-      <a class="logo" href="index.html">
-        <span class="logo-mark">
-          <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
-              <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
-              <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
-              <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
-              <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
-              <circle cx="122" cy="34" r="4" fill="#203040"/>
-              <circle cx="70" cy="70" r="30" fill="#203040"/>
-              <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
-              <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
-              <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
-              <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
-              <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
-              <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
-            </g>
-          </svg>
-        </span>
-        <span class="logo-text">KACHOW</span>
-      </a>
-      <a class="home-link" href="index.html">Back to home</a>
+      <div class="card-top">
+        <a class="logo" href="index.html">
+          <span class="logo-mark">
+            <svg viewBox="0 0 160 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g stroke="#203040" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+                <path d="M46 30h78c8 0 14 6 14 14v30c0 8-6 14-14 14H46c-8 0-14-6-14-14V44c0-8 6-14 14-14z" fill="#E65047"/>
+                <path d="M32 64h106v18c0 8-6 14-14 14H46c-8 0-14-6-14-14V64z" fill="#68B7B1"/>
+                <path d="M108 20h28c6 0 10 4 10 10v14c0 6-4 10-10 10h-28z" fill="#E65047"/>
+                <rect x="112" y="26" width="20" height="16" rx="4" fill="#FFF6E6"/>
+                <circle cx="122" cy="34" r="4" fill="#203040"/>
+                <circle cx="70" cy="70" r="30" fill="#203040"/>
+                <circle cx="70" cy="70" r="23" fill="#FFF6E6"/>
+                <circle cx="70" cy="70" r="14" fill="#2F4A5A"/>
+                <circle cx="64" cy="64" r="4" fill="#FFF6E6"/>
+                <path d="M104 70l8-8 8 8-8 8-8-8z" fill="#FFF6E6"/>
+                <circle cx="114" cy="80" r="3" fill="#FFF6E6"/>
+                <path d="M104 86h16" stroke="#FFF6E6" stroke-width="4"/>
+              </g>
+            </svg>
+          </span>
+          <span class="logo-text">KACHOW</span>
+        </a>
+        <a class="home-link" href="index.html">Back to home</a>
+      </div>
       <h1 id="eventName">Upload to event</h1>
       <p id="eventMessage" class="subhead">Take a photo or record a video to upload.</p>
       <div id="qrBlock" class="qr-block hidden">
-        <img id="qrImage" class="qr-image" alt="QR code for guest upload" />
-        <div class="qr-link" id="qrLink"></div>
-        <div class="qr-actions">
-          <button id="copyLinkBtn" class="button secondary" type="button">Copy guest link</button>
-          <a id="downloadQrBtn" class="button secondary" href="#" download="kachow-guest-qr.png">Download QR</a>
+        <div class="qr-frame">
+          <img id="qrImage" class="qr-image" alt="QR code for guest upload" />
+          <div class="qr-link" id="qrLink"></div>
+          <div class="qr-actions">
+            <button id="copyLinkBtn" class="button secondary" type="button">Copy guest link</button>
+            <a id="downloadQrBtn" class="button secondary" href="#" download="kachow-guest-qr.png">Download QR</a>
+          </div>
         </div>
       </div>
       <button id="btn" class="button">📸 Take Photo / 🎥 Record Video</button>
